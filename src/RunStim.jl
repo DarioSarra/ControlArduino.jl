@@ -1,9 +1,9 @@
-const LaserController = falses(8)
+const ArduinosController = falses(8)
 Arduino_dict = Dict(1=>"COM4")
 #function take the runing state of the Arduino from process 2
-running(Arduino) = @fetchfrom 2 LaserController[Arduino]
+running(Arduino) = @fetchfrom 2 ArduinosController[Arduino]
 #function change the runing state of the Arduino from process 2
-running!(Arduino, val) = @fetchfrom 2 LaserController[Arduino] = val
+running!(Arduino, val) = @fetchfrom 2 ArduinosController[Arduino] = val
 
 function session_specs(ST::SessionStruct)
     sp = [string(ST.Arduino),
@@ -22,7 +22,7 @@ function run_task(ST::SessionStruct)
     port = SerialPort(Arduino_dict[ST.Arduino])
     file = ST.FileName
 
-    if !port.open
+    if !port.is_open
         open(port)
         set_speed(port,115200)
         println("Opening Port")
@@ -30,17 +30,20 @@ function run_task(ST::SessionStruct)
 
     println("Wait")
     sleep(0.5)
-    read_m(port,file)
+    m = read_m(port,file)
+    println(m)
     sleep(0.5)
     # write(port,session_specs(ST))
     # sleep(1)
 
     @async begin
-        while LaserController[ST.Arduino]
+        while ArduinosController[ST.Arduino]
           if bytesavailable(port) > 0
             m = readuntil(port, '\n', 0.5)
-             if occursin("-666",m)
+            println(readuntil(port, '\n', 0.5))
+             if occursin("Type 'S' to start",m)
                  println("All is well in $(ST.Arduino)")
+                 write(port,'S')
              end
             open(ST.filename, "a") do io
                 print(io, m)

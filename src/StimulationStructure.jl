@@ -13,7 +13,7 @@ end
 
 function SessionStruct(MouseID::String, Weight::Float64; Arduino = 1, Directory = default_dir)
 
-    d = replace(string(Dates.today()), "-"=>"")
+    d = replace(string(today()), "-"=>"")
     session =  MouseID*"_"*d
     i = 97
     filename = joinpath(Directory,session*Char(i)*".csv")
