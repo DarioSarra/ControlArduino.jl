@@ -1,5 +1,5 @@
 const ArduinosController = falses(8)
-Arduino_dict = Dict(1=>"COM4")
+Arduino_dict = Dict(1=>"COM4", 2 => "/dev/ttyACM0")
 #function take the runing state of the Arduino from process 2
 running(Arduino) = @fetchfrom 2 ArduinosController[Arduino]
 #function change the runing state of the Arduino from process 2
