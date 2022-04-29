@@ -51,18 +51,7 @@ void setup() {
 }
 
 void loop() {
-//  if (Serial.available() > 0) { // input absollute value to Volume Counting for testing
-//    // read the incoming byte:
-//    VolumeCount = Serial.parseInt();
-//    Serial.print("Current volume count is: ");
-//    Serial.println(VolumeCount);
-//  }
-//if (millis() - Start > 1000) { // This is for testing volume in terms of seconds passed instead of ttl
-//  ++VolumeCount;
-//  Start = millis();
-//  savestatus ();
-//}
-updatevolumes();// This i what you have to check
+updatevolumes();// This counts TTLs coming from the scanner to
 
   switch (State) {
     case 1: // This is to wait 30 seconds before stim
@@ -98,11 +87,7 @@ updatevolumes();// This i what you have to check
   }
  }
   
-
-
-
-
-
+/*------------------------------------------Saving Functions--------------------------------------------------------------- */
 void savestatus () {
   Serial.println(String(VolumeCount) + ',' + \
   String(millis()) + ',' + \
@@ -147,6 +132,14 @@ void stimtiming (int volumecount, int framehigh, int framelow) {
     Stim = false;
   }
 }
+//void stimtiming (int volumecount, int firsthz, int firstvols, int secondhz, int secondvols) {
+//  if ((volumecount % (firstvols + secondvols)) <= firstvols) {
+//    stimatfreq (StimOnset, firsthz, Pulse);
+//  }
+//  else {
+//    stimatfreq (StimOnset, secondhz, Pulse);
+//  }
+//}
 
 void highstim () {
   stimtiming ((VolumeCount - StimCount), 5, 10);

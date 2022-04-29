@@ -9,38 +9,18 @@ const ArduinosController = falses(8)
 ##
 @everywhere include("FunsForWorker.jl")
 ##
-
-list_ports()
-p = LibSerialPort.open(Arduino_dict[3],115200)
-bytesavailable(p)
-t = @async begin
-    if bytesavailable(p) > 0
-        m = readuntil(p,'\n')
-        println(m)
-        sleep(0.1)
-        if contains(m,"Waiting for Inputs")
-            println("matched")
-            sleep(0.1)
-            send_m(p,42)
-            send_m(p,60)
-        end
-        sleep(0.1)
-    end
-end
-close(p)
-##
-port = SerialPort(Arduino_dict[Ard])
-LibSerialPort.set_speed(port,115200)
-LibSerialPort.set_flow_control(port, rts = SP_RTS_ON,dtr = SP_DTR_ON)
-open(port)
-close(port)
-##
 list_ports()
 Arduino_dict
 Ard  = 5
+stimvolumes = 5
+unstimvolumes = 5
+filename = "C:\\Users\\precl\\OneDrive\\Documents\\ArduinoData\\test.csv"
 running(Ard)
 running!(Ard,true)
-task = @spawnat :any run_opto(Ard)
+task = @spawnat :any run_opto(Ard,stimvolumes, unstimvolumes, filename)
 running!(Ard,false)
 fetch(task)
 ##
+open("C:\\Users\\precl\\OneDrive\\Documents\\ArduinoData\\test.csv","a") do io
+    print(io,"test")
+end
