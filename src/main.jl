@@ -29,9 +29,15 @@ t = @async begin
 end
 close(p)
 ##
+port = SerialPort(Arduino_dict[Ard])
+LibSerialPort.set_speed(port,115200)
+LibSerialPort.set_flow_control(port, rts = SP_RTS_ON,dtr = SP_DTR_ON)
+open(port)
+close(port)
+##
 list_ports()
 Arduino_dict
-Ard  = 3
+Ard  = 5
 running(Ard)
 running!(Ard,true)
 task = @spawnat :any run_opto(Ard)
