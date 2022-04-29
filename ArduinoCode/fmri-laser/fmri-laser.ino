@@ -17,13 +17,14 @@ boolean        StimBlock     = true;     // variable to control blocks of stim a
 
 // Frame count variables
 bool           NewVolume     = false;
-int            VolumeCount   = 0;        // Counter of the images acquired by the scanner
-int            RunCount      = 0;        // Stores frame counter at the latest run beginning
-int            StimCount     = 0;        // Stores frame counter at the latest stim block start
-int            EndingCount   = 0;        // Stores frame counter at the latest stim block end
-int            StimVolumes   = 60;       // Number of images to stimulate
-int            UnstimVolumes = 30;       // Number of images to NOT stimulate
-int            State         = 1;        // Switch State variable
+int            VolumeCount   = 0;              // Counter of the images acquired by the scanner
+int            RunCount      = 0;              // Stores frame counter at the latest run beginning
+int            StimCount     = 0;              // Stores frame counter at the latest stim block start
+int            EndingCount   = 0;              // Stores frame counter at the latest stim block end
+int            WaitingIntVal = -1;             // this is a place holder for int values that needs to be transmitted
+int            StimVolumes   = WaitingIntVal;  // Number of images to stimulate
+int            UnstimVolumes = WaitingIntVal;  // Number of images to NOT stimulate
+int            State         = 1;              // Switch State variable
 
 
 // Stimulation parameters
@@ -40,14 +41,13 @@ void setup() {
   pinMode(A2, INPUT);
   StimOnset = millis();
   Serial.begin(115200);
-  Serial.println("Type 'S' to start");
+  //Serial.println("Type 'S' to start");
+  Serial.println(String("Waiting for Inputs"));
   delay(100);
+  WaitForNumericalInput(StimVolumes);
+  WaitForNumericalInput(UnstimVolumes);
+  Serial.println(String("All Good:") + ' ' + String(millis())); // Signal that all is well
   Serial.println("Volume,Time,State,Hz");
-  while (Begin == -1) {
-      if (Serial.read() == 'S') {
-        Begin = 1;
-      }
-    }
 }
 
 void loop() {
@@ -98,7 +98,34 @@ updatevolumes();// This i what you have to check
   }
  }
   
-//  stimulation();
+
+
+
+
+
+void savestatus () {
+  Serial.println(String(VolumeCount) + ',' + \
+  String(millis()) + ',' + \
+  String(State) + ',' + \
+  String(CurrentHZ)
+  );
+}
+
+/*------------------------------------------TTL Functions--------------------------------------------------------------- */
+
+void updatevolumes () {
+  if ((read_ttl) && !(NewVolume)) {
+    NewVolume = true;
+    ++VolumeCount;
+    savestatus ();
+  }
+  else if (!(read_ttl) && NewVolume) {
+    NewVolume = false;
+  }
+}
+/*------------------------------------------Stimulation Functions------------------------------------------------------- */
+// control the stimulation frequency
+
 void stimatfreq (long onset, int freq, int pulse) {
   if ((millis()-onset)*freq % 1000 < pulse*freq){
     digitalWrite(OutputPin, HIGH);
@@ -108,6 +135,7 @@ void stimatfreq (long onset, int freq, int pulse) {
   }
 }
 
+// Create a boolean variable to alternate periodo of stimulated and unstimulated volumes
 // counting the frame received from the start of the last block of stimulation 
 // it checks wheter the stimulation should be on or off at this point: 
 // for intance 12Hz requires stim 5 seconds on and 10 seconds Off
@@ -136,22 +164,51 @@ void lowstim () {
   CurrentHZ = 4;
   stimatfreq (StimOnset, 4, Pulse);
 }
+/*------------------------------------------Input Functions--------------------------------------------------------------- */
+/* -------------------------------------------------------------------
+   --------------------  Receive Number ---------------------------
+   convert a string into a Int value to be used in the code*/
+ int SerialRead_Int_Value() {
+    boolean NewData = true;
+    int dataNumber;
+    boolean recvInProgress = false;
+    char startMarker = '<';
+    char endMarker = '>';
+    char rc;
+    static byte ndx = 0;
+    const byte numChars = 32;
+    char receivedChars[numChars];
 
-void savestatus () {
-  Serial.println(String(VolumeCount) + ',' + \
-  String(millis()) + ',' + \
-  String(State) + ',' + \
-  String(CurrentHZ)
-  );
+  while(NewData){
+    if (Serial.available() > 0) {
+        rc = Serial.read();
+        if (recvInProgress == true) {
+          if (rc != endMarker) {
+              receivedChars[ndx] = rc;
+              ndx++;
+              if (ndx >= numChars) {
+                  ndx = numChars - 1;
+              }
+          }
+          else {
+              receivedChars[ndx] = '\0'; // terminate the string
+              ndx = 0;
+              NewData = false;
+          }
+        }
+        else if (rc == startMarker) {
+            recvInProgress = true;
+        }
+    }
+  }
+  dataNumber = atoi(receivedChars);
+  return dataNumber;
 }
 
-void updatevolumes () {
-  if ((read_ttl) && !(NewVolume)) {
-    NewVolume = true;
-    ++VolumeCount;
-    savestatus ();
-  }
-  else if (!(read_ttl) && NewVolume) {
-    NewVolume = false;
-  }
+/* -------------------- Function to send variables as a csv string -------------------- 
+the & symbol enable the call-by-reference option otherwise it would only copy x value*/
+void WaitForNumericalInput(int &x){
+  while (x == -1) {x = SerialRead_Int_Value();}
+  Serial.println(String(x) + ' ' + String(millis())); // Signal that all is well
+  delay(100);
 }
