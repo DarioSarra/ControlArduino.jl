@@ -1,5 +1,5 @@
 ##
-Arduino_dict = Dict(1=>"COM4", 2 => "/dev/ttyACM2", 3 => "/dev/ttyACM0")
+Arduino_dict = Dict(1 => "/dev/ttyACM1",2 => "/dev/ttyACM2",3 => "/dev/ttyACM0", 4 =>"COM4")
 #function take the runing state of the Arduino from process 2
 running(Arduino_port) = @fetchfrom 1 ArduinosController[Arduino_port]
 #function change the runing state of the Arduino from process 2

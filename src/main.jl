@@ -9,7 +9,7 @@ const ArduinosController = falses(8)
 ##
 @everywhere include("FunsForWorker.jl")
 ##
-Arduino_dict[3]
+
 list_ports()
 p = LibSerialPort.open(Arduino_dict[3],115200)
 bytesavailable(p)
@@ -29,7 +29,9 @@ t = @async begin
 end
 close(p)
 ##
-Ard  = 2
+list_ports()
+Arduino_dict
+Ard  = 3
 running(Ard)
 running!(Ard,true)
 task = @spawnat :any run_opto(Ard)
