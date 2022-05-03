@@ -5,12 +5,12 @@ workers()
 @everywhere Pkg.activate(".")
 @everywhere using LibSerialPort
 # @everywhere using ControlArduino
-const ArduinosController = falses(8)
+
 ##
 @everywhere include("FunsForWorker.jl")
 ##
 list_ports()
-Ard  = 4
+Ard  = "COM4"
 Arduino_dict[Ard]
 stimvolumes = 20
 unstimvolumes = 5
@@ -20,9 +20,9 @@ stimdur1 = repeat([5],6)
 stimfreq2 = [0,4,12,4,12,0]
 stimdur2 = repeat([5],6)
 filename = "C:\\Users\\precl\\OneDrive\\Documents\\ArduinoData\\test.csv"
-running(Ard)
+
 ##
-running!(Ard,true)
+@spawnat 1 running!(Ard,true)
 task = @spawnat :any run_opto(Ard,
     stimvolumes, unstimvolumes, stimulations,
     stimfreq1,stimdur1,
@@ -35,3 +35,6 @@ fetch(task)
 workers()
 Distributed.interrupt(7)
 ##
+ports_available = get_port_list()
+Arduino_dict = OrderedDict(k => v for (k,v) in zip(ports_available,1:length(ports_available)))
+get(Arduino_dict,"COM4",0)
