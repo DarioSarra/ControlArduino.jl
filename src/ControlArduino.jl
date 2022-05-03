@@ -1,12 +1,20 @@
 module ControlArduino
     using Reexport
-    using LibSerialPort, Interact, Blink, CSSUtil, Distributed
-    import Dates.today
+    @reexport using Distributed
+    nprocs() != 3 && addprocs(2,exeflags="--project")
+    workers()
+    @everywhere using Pkg   # required
+    @everywhere Pkg.activate(".")
+    @everywhere using LibSerialPort, Distributed
+    @everywhere import Dates.today, Dates.Date
 
     include("StimulationStructure.jl")
-    include("RunStim.jl")
+    const ArduinosController = falses(8)
+    ports_available = get_port_list()
+    const Arduino_dict = Dict(k => v for (k,v) in zip(ports_available,1:length(ports_available)))
+    @everywhere include(joinpath(@__DIR__,"RunStim.jl"))
+    @everywhere include(joinpath(@__DIR__,"ExpWidget.jl"))
 
-    export ArduinosController,Arduino_dict, running, running!
-    export SessionStruct
-    export run_task
+    export SessionStruct, FreqStruct, ExpStruct
+    export run_task, ArduinosController, Arduino_dict, running, running!
 end

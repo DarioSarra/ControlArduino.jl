@@ -1,11 +1,14 @@
-Arduino_dict = Dict(1 => "/dev/ttyACM1",
-    2 => "/dev/ttyACM2",
-    3 => "/dev/ttyACM0",
-    4 =>"COM4", 5 => "COM5")
+# Arduino_dict = Dict(1 => "/dev/ttyACM1",
+#     2 => "/dev/ttyACM2",
+#     3 => "/dev/ttyACM0",
+#     4 =>"COM4", 5 => "COM5")
+const ArduinosController = falses(8)
+ports_available = get_port_list()
+const Arduino_dict = Dict(k => v for (k,v) in zip(ports_available,1:length(ports_available)))
 #function take the runing state of the Arduino from process 2
-running(Arduino_port) = @fetchfrom 1 ArduinosController[Arduino_port]
+running(Arduino_port) = @fetchfrom 1 ArduinosController[get(Arduino_dict,Arduino_port,0)]
 #function change the runing state of the Arduino from process 2
-running!(Arduino_port, val) = @fetchfrom 1 ArduinosController[Arduino_port] = val
+running!(Arduino_port, val) = @fetchfrom 1 ArduinosController[get(Arduino_dict,Arduino_port,0)] = val
 
 function send_m(port,what::Int64)
     w = string(what)
@@ -25,7 +28,7 @@ function run_opto(Arduino_port,
     StimFreq2, StimDur2,
     filename)
     # StimVolumes%(StimDur1+StimDur2) != 0 && error("amount of stimulated volumes is not a multiple of summed stim durations 1 and 2")
-    port = SerialPort(Arduino_dict[Arduino_port])
+    port = SerialPort(Arduino_port)
     try
         open(port)
     catch e
