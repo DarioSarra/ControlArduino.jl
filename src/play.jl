@@ -1,7 +1,7 @@
-using Revise, ControlArduino
+using Revise, Interact, Blink, CSSUtil, LibSerialPort
+import Dates.today, Dates.Date
+include("StimulationStructure.jl")
 ##
-ArduinosController
-ControlArduino.
 high = (12,5,0,10)
 low = (4,60,0,0)
 mixed = (12,5,4,10)
@@ -10,26 +10,19 @@ s2 = [high,low,mixed,low,mixed,high]
 s3 = [low,high,mixed,high,low,mixed]
 s4 = [mixed,high,low,high,mixed,low]
 ##
-import Dates.today
-FreqStruct(s1)
-SessionStruct()
-es = ExpStruct()
+f = FreqStruct(s1)
+s = SessionStruct()
+es = ExpStruct(f,s,60,30)
 es.Frequencies = FreqStruct(s1)
 es.Session = SessionStruct("test",24,"COM4")
 ##
-using Interact, Blink, CSSUtil, LibSerialPort
-import Dates.today
-
-m = textbox(value="test")
-m[]
-
 function Widgets.widget(s::SessionStruct)
 	p = button("Prepare task")
-        m = textbox(value = s.MouseID)
+        m = textbox(value = "test")
         w = spinbox([1,700]; value = 25)
-        d = widget(Dates.today())
-	f = textbox(value = s.Directory)
-        a = autocomplete(get_port_list())
+        d = widget(today())
+	f = textbox(value = default_dir)
+        a = autocomplete(get_port_list(); value ="chose a port")
 
         output = Observable{SessionStruct}(SessionStruct(missing))
 
@@ -44,21 +37,15 @@ function Widgets.widget(s::SessionStruct)
                         :Weight => w,
                         :Day => d,
                         :Arduino => a,
-			:Prepare => p
-                        )
-                )
+			:Prepare => p),
+                output = output)
 
-        @layout! wdg vbox(
-		hbox(1em,:MouseID, 1em, :Weight),1em,
-		hbox(1em,:Day,1em,:Arduino), 1em,
+        @layout! wdg vbox(vskip(1em),
+		hbox(:MouseID,hskip(1em), :Weight),
+		hbox(:Day,hskip(1em),:Arduino),
 		:Prepare)
 end
-a = autocomplete(get_port_list())
-w = spinbox([1,700]; value = 25)
-w[]
-d = widget(today())
-d[]
-typeof(today())
-isdir(ControlArduino.default_dir)
+##
 
-ports_available = get_port_list()
+w_ses = widget(s)
+w_ses[]

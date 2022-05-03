@@ -1,11 +1,14 @@
 const default_dir = joinpath("C:\\Users","precl","OneDrive","Documents","OptoRawData")
 mutable struct SessionStruct
-    MouseID::Union{AbstractString,Missing}
+    MouseID::Union{String,Missing}
     Weight::Union{Real,Missing}
     Day::Union{String,Missing}
-    FileName::Union{AbstractString,Missing}
-    Arduino::Union{Int64,Missing}
+    Directory::Union{String,Missing}
+    FileName::Union{String,Missing}
+    Arduino::Union{String,Missing}
 end
+
+# SessionStruct(MouseID::String,Weight::Real,Today::String, filename::String, Arduino::String) =  SessionStruct(MouseID,Weight,Today, filename, Arduino)
 
 function createfilename(MouseID::String,Today::String, Directory::String)
     isdir(Directory) || error("Directory not found")
@@ -21,9 +24,10 @@ end
 
 function SessionStruct(MouseID::String, Weight::Real,Today::Date,Directory::String,Arduino::String)
     filename = createfilename(MouseID, replace(string(Today), "-"=>""), Directory)
-    SessionStruct(MouseID,Weight,string(Today), filenam, Arduino)
+    SessionStruct(MouseID,Weight,string(Today), Directory, filename, Arduino)
 end
-SessionStruct(missing) = SessionStruct(missing,missing,missing,missing,missing)
+SessionStruct(MouseID::String,Weight::Real,Arduino::String) = SessionStruct(MouseID, Weight,today(),default_dir,Arduino)
+SessionStruct(missing) = SessionStruct(missing,missing,missing,missing,missing, missing)
 SessionStruct() = SessionStruct(missing)
 
 mutable struct FreqStruct
