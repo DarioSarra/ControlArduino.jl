@@ -10,17 +10,17 @@ running!(Arduino_port, val) = @fetchfrom 1 ArduinosController[Arduino_port] = va
 function send_m(port,what::Int64)
     w = string(what)
     write(port,"<"*w*">")
-    sleep(0.1)
 end
 
 function send_m(port,what::Vector{Int64})
     for x in what
         send_m(port,x)
     end
+    sleep(1)
 end
 
 function run_opto(Arduino_port,
-    StimVolumes,UnstimVolumes,
+    StimVolumes,UnstimVolumes,Stimulations,
     StimFreq1, StimDur1,
     StimFreq2, StimDur2,
     filename)
@@ -46,16 +46,17 @@ function run_opto(Arduino_port,
                     println(m)
                     sleep(0.001)
                     if contains(m,"Waiting for Inputs")
-                        println("Sending inputs: stimvolumes = $stimvolumes, unstimvolumes = $unstimvolumes")
-                        sleep(0.001)
-                        send_m(port,StimVolumes)
-                        send_m(port,UnstimVolumes)
-                        send_m(port,StimFreq1)
-                        send_m(port,StimDur1)
-                        send_m(port,StimFreq2)
-                        send_m(port,StimDur2)
-
-                        sleep(0.001)
+                        @async begin
+                            println("Sending inputs: stimvolumes = $stimvolumes, unstimvolumes = $unstimvolumes")
+                            send_m(port,StimVolumes)
+                            send_m(port,UnstimVolumes)
+                            send_m(port,Stimulations)
+                            send_m(port,StimFreq1)
+                            send_m(port,StimDur1)
+                            send_m(port,StimFreq2)
+                            send_m(port,StimDur2)
+                            sleep(0.001)
+                        end
                     end
                     if task_begun
                         open(filename, "a") do io

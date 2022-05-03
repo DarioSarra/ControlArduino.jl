@@ -30,16 +30,16 @@ int            State          = 1;              // Switch State variable
 
 // Stimulation parameters
 int           StimCount    = 0; // variable to keep track of the current run as an index of the stim definition arrays
-const int     Stimulations = 6; // variable that determines how many different type of stimulations are to be run
+int           Stimulations = WaitingIntVal; // variable that determines how many different type of stimulations are to be run
 int           idx;              // variable that ensures looping on the right stim indexes once the Stimulation count is more than the stimulation types
 
 unsigned long StimOnset    = 0;
 int           Pulse        = 10;       // PulseWidth
 int           CurrentHZ    = 0;        // Saving Variable
-int           StimFreq1[Stimulations];
-int           StimDur1[Stimulations];
-int           StimFreq2[Stimulations];
-int           StimDur2[Stimulations];
+int           StimFreq1[10];
+int           StimDur1[10];
+int           StimFreq2[10];
+int           StimDur2[10];
 
 
 
@@ -47,26 +47,29 @@ void setup() {
   // put your setup code here, to run once:
   pinMode(OutputPin, OUTPUT);
   pinMode(A2, INPUT);
-  
-  StimOnset = millis();
-  memset(StimFreq1,-1,Stimulations*sizeof(int));//memeset is a function so it has to be called in the loop
-  memset(StimDur1,-1,Stimulations*sizeof(int)); // also memset depends on the number of bits not array cells
-  memset(StimFreq2,-1,Stimulations*sizeof(int));
-  memset(StimDur2,-1,Stimulations*sizeof(int));
-  
+
   Serial.begin(115200);
-  //Serial.println("Type 'S' to start");
   Serial.println(String("Waiting for Inputs"));
   delay(100);
   
   WaitForNumericalInput(StimVolumes);
   WaitForNumericalInput(UnstimVolumes);
+  WaitForNumericalInput(Stimulations);
+ 
+  StimOnset = millis();
+  memset(StimFreq1,-1,Stimulations*sizeof(int));//memeset is a function so it has to be called in the loop
+  memset(StimDur1,-1,Stimulations*sizeof(int)); // also memset depends on the number of bits not array cells
+  memset(StimFreq2,-1,Stimulations*sizeof(int));
+  memset(StimDur2,-1,Stimulations*sizeof(int));
+
   WaitForIntArray(StimFreq1,Stimulations);
   WaitForIntArray(StimDur1,Stimulations);
   WaitForIntArray(StimFreq2,Stimulations);
   WaitForIntArray(StimDur2,Stimulations);
+
   Serial.println(String("All Good:") + ' ' + String(millis())); // Signal that all is well
   Serial.println("Volume,Time,State,Hz, StimCount");
+  delay(10);
 }
 
 void loop() {
@@ -195,14 +198,15 @@ the & symbol enable the call-by-reference option otherwise it would only copy x 
 void WaitForNumericalInput(int &x){
   while (x == WaitingIntVal) {x = SerialRead_Int_Value();}
   Serial.println(String(x) + ' ' + String(millis())); // Signal that all is well
-  delay(100);
+//  delay(100);
 }
 
 void WaitForIntArray(int x[], int Size) { //In C and C++ there is no way (no way) that a function can know the size of an array unless you tell it. So the array size has to be a separate argument.
   for (int i = 0; i < Size; i++){
     while (x[i] == WaitingIntVal) {x[i] = SerialRead_Int_Value();}
+//    delay(100);
     Serial.print(String(x[i])+ ' ');
   }
   Serial.println();
-  delay(100);
+//  delay(1000);
 }
