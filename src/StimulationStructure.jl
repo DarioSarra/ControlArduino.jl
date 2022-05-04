@@ -26,7 +26,7 @@ function SessionStruct(MouseID::String, Weight::Real,Today::Date,Directory::Stri
     filename = createfilename(MouseID, replace(string(Today), "-"=>""), Directory)
     SessionStruct(MouseID,Weight,string(Today), Directory, filename, Arduino)
 end
-SessionStruct(MouseID::String,Weight::Real,Arduino::String) = SessionStruct(MouseID, Weight,today(),default_dir,Arduino)
+SessionStruct(MouseID::String,Weight::Real,Arduino::String) = SessionStruct(MouseID, Weight,today(),isdir(default_dir) ? default_dir : @__DIR__,Arduino)
 SessionStruct(missing) = SessionStruct(missing,missing,missing,missing,missing, missing)
 SessionStruct() = SessionStruct(missing)
 

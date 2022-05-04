@@ -1,11 +1,10 @@
 function Widgets.widget(s::SessionStruct)
 	p = button("Prepare Session Info")
-    # m = textbox(value = "test") # Subject ID
-	m = mytextbox("Subject"; value = "test")
-    w = myspinbox("Weight in g";value= 25) #spinbox([1,700]; value = 25) # Weight
-    d = mydatepicker("Day", today()) # widget(today()) # Date
-	f = textbox(value = default_dir) # Directory
-    a = dropdown(get_port_list(); value ="chose a port") # Serial Port address
+	m = labeled_widget("Subject", textbox; value = "test")
+	w = labeled_widget("Weight in g", spinbox; value = 25)
+	d = labeled_widget("Day", datepicker; value = today())
+	f = labeled_widget("Directory", textbox;value = isdir(default_dir) ? defaultdir : @__DIR__)
+	a = labeled_widget("Serial Port",dropdown; val = get_port_list())
 
 	res = Observable{String}("Waiting for input")
 
@@ -16,61 +15,41 @@ function Widgets.widget(s::SessionStruct)
 	    SessionStruct(m[],w[],d[], f[], a[])
 	end
 
-	i = Observable{}(textarea(;value = "Waiting for input", rows = 2))
-	function update_res(m,w,s)
-		textarea(;value = "Subject: "*m*", "*string(w)*
-			"g\n"*s.FileName, rows = 2)
+	i = Observable{}(labeled_widget("File output",textarea;value = "Waiting for input", rows = 8))
+	function update_res(m,w,a,s)
+		labeled_widget("File output",textarea;
+			value = "Subject: "*m*", "*string(w)*"g\n"*
+			"\n Port: "*a* "\n"*
+			"\n File name: "*s.FileName, rows = 2)
 	end
 
-	Interact.@map! i update_res(&m,&w,&output)
+	Interact.@map! i update_res(&m,&w,&a,&output)
 
 	wdg = Widget{:Session_attributes}(
             OrderedDict(
-                    :MouseID => m,
+                    :Subject => m,
                     :Weight => w,
                     :Day => d,
                     :Arduino => a,
+					:Directory => f,
 					:Info => i,
 					:Prepare => p),
             output = output)
 
 	@layout! wdg vbox(vskip(1em),
-			hbox(
-				vbox(
-						hbox(:MouseID,hskip(1em), :Weight),
-						vskip(1em),
-						hbox(:Day,hskip(1em),:Arduino),
-					),
-				hskip(1em),
-				:Info
-				),
-			:Prepare
-		)
+					hbox(
+						vbox(:Subject, vskip(1em),:Day), hskip(1em),
+						vbox(:Weight, vskip(1em),:Arduino), hskip(1em),
+						vbox(:Directory, vskip(1em), :Info)
+						),
+					:Prepare
+					)
 end
 
-function mytextbox(label::String; value = "", hint = "insert text")
-	mytextbox_d = OrderedDict(:label => label, :w => textbox(hint; value = value))
-	mytextbox_output = map(t->t, mytextbox_d[:w])
-	w = Interact.Widget{:mytextbox}(mytextbox_d, output = mytextbox_output)
-	@layout! w vbox(:label, :w) # observe(_) refers to the output of the widget
-	return w
-end
-
-function myspinbox(label::String; minmax = nothing, value = nothing)
-	if !isnothing(minmax)
-		length(minmax) == 2 || error("indicate 2 values for min max")
-	end
-	d = OrderedDict(:label => label, :w => spinbox(minmax; value = value))
+function labeled_widget(label, or; val = nothing, kwargs...)
+	d = OrderedDict(:label => label, :w => or(val; kwargs...))
 	o = map(t->t, d[:w])
-	w = Interact.Widget{:myspinbox}(d, output = o)
-	@layout! w vbox(:label, :w) # observe(_) refers to the output of the widget
-	return w
-end
-
-function mydatepicker(label::String, val)
-	d = OrderedDict(:label => label, :w => datepicker(value = val))
-	o = map(t->t, d[:w])
-	w = Interact.Widget{:mydatepicker}(d, output = o)
+	w = Interact.Widget{:labeled}(d, output = o)
 	@layout! w vbox(:label, :w)
 	return w
 end
