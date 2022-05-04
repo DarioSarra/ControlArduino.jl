@@ -23,7 +23,8 @@ w_ses[]
 c = mytextbox("Subject"; value = "test")
 c[]
 c = myspinbox("Weight in g";value= 25)
-datepicker()
+datepicker(value = today())
+mydatepicker("Day", today())
 ##
 function Widgets.widget(s::FreqStruct)
 	p = button("Prepare Session Stimulation")

@@ -3,7 +3,7 @@ function Widgets.widget(s::SessionStruct)
     # m = textbox(value = "test") # Subject ID
 	m = mytextbox("Subject"; value = "test")
     w = myspinbox("Weight in g";value= 25) #spinbox([1,700]; value = 25) # Weight
-    d = widget(today()) # Date
+    d = mydatepicker("Day", today()) # widget(today()) # Date
 	f = textbox(value = default_dir) # Directory
     a = dropdown(get_port_list(); value ="chose a port") # Serial Port address
 
@@ -60,9 +60,17 @@ function myspinbox(label::String; minmax = nothing, value = nothing)
 	if !isnothing(minmax)
 		length(minmax) == 2 || error("indicate 2 values for min max")
 	end
-	myspinbox_d = OrderedDict(:label => label, :w => spinbox(minmax; value = value))
-	myspinbox_output = map(t->t, myspinbox_d[:w])
-	w = Interact.Widget{:myspinbox}(myspinbox_d, output = myspinbox_output)
+	d = OrderedDict(:label => label, :w => spinbox(minmax; value = value))
+	o = map(t->t, d[:w])
+	w = Interact.Widget{:myspinbox}(d, output = o)
 	@layout! w vbox(:label, :w) # observe(_) refers to the output of the widget
+	return w
+end
+
+function mydatepicker(label::String, val)
+	d = OrderedDict(:label => label, :w => datepicker(value = val))
+	o = map(t->t, d[:w])
+	w = Interact.Widget{:mydatepicker}(d, output = o)
+	@layout! w vbox(:label, :w)
 	return w
 end
