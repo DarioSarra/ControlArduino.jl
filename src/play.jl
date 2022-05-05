@@ -18,12 +18,14 @@ es.Frequencies = FreqStruct(s1)
 es.Session = SessionStruct("test",24,"COM4")
 ##
 w_ses = widget(s); w = Window(); body!(w,w_ses)
+w_freq = widget(f); w = Window(); body!(w,w_freq)
+
 w_ses[]
 ##
 FreqStruct()
 c = stim_wid()
 c[]
-c2 = stim_wid2(3)
+c2 = widget(f);
 c2[]
 ##
 function Widgets.widget(f::FreqStruct)
