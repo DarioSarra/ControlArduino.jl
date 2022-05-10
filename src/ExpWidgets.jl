@@ -92,6 +92,14 @@ function Interact.widget(f::FreqStruct)
 	stim_n = labeled_widget("Select # of stim protocols between 1 and 10",spinbox;val = (1:10),
 		value = f.Stimulations > 0 ? f.Stimulations : 1)
 	coll = button("Collect stim frequencies")
+	freq_opt = labeled_widget("Premade Stim",dropdown,
+		val = OrderedDict(
+			"Stim_1" => [high,low,mixed,low,high,mixed],
+			"Stim_2" => [high,low,mixed,low,mixed,high],
+			"Stim_3" => [low,high,mixed,high,low,mixed],
+			"Stim_4" => [mixed,high,low,high,mixed,low]
+			)
+	)
 
 	stims_layout = Observable{Any}(dom"div"())
 	spins = Observable{Any}(stim_widget(tuple_frequencies(f.Frequency1,f.Volumes1,f.Frequency2,f.Volumes2)))
@@ -99,15 +107,18 @@ function Interact.widget(f::FreqStruct)
 
 	Interact.@map! spins begin
 		&stim_n
-		if 0 < stim_n[] <= f.Stimulations
+		if stim_n[] <= f.Stimulations
 			[single_stim_widget(;freq = (f.Frequency1[i],f.Volumes1[i],f.Frequency2[i],f.Volumes2[i])) for i in 1:stim_n[]]
 		else
 			[single_stim_widget() for i in 1:stim_n[]]
 		end
 	end
 
+	Interact.@map! spins stim_widget(&freq_opt)
+
 	Interact.@map! stims_layout begin
 		&stim_n
+		&freq_opt
 		hbox(
 			vbox(latex("Freq Stim1"),
 				latex("Volumes1"),
@@ -117,7 +128,7 @@ function Interact.widget(f::FreqStruct)
 			,spins[]...)
 	end
 
-	Interact.@map! o  begin
+	Interact.@map! o begin
 		&coll
 		FreqStruct([(x[:f1][], x[:v1][],x[:f2][],x[:v2][]) for x in spins[]])
 	end
@@ -125,10 +136,16 @@ function Interact.widget(f::FreqStruct)
 	d = OrderedDict{Any,Any}(
 		:Stims => stim_n,
 		:Coll => coll,
-		:Freq => stims_layout
+		:Freq_layout => stims_layout,
+		:Freq_vals => spins,
+		:Opts => freq_opt
 	)
 	w = Interact.Widget{:Stims}(d, output = o)
-	@layout! w vbox(vskip(1em),stim_n,vskip(1em),stims_layout,vskip(1em),coll)
+	@layout! w vbox(vskip(1em),
+		hbox(stim_n,hskip(1em),:Opts),
+		vskip(1em),
+		stims_layout,
+		vskip(1em),coll)
 end
 
 
