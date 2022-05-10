@@ -21,9 +21,7 @@ es
 ##
 w_ses = widget(s); w = Window(); body!(w,w_ses)
 w_freq = widget(f); w = Window(); body!(w,w_freq)
-w_freq[]
 ##
-w_ex = widget(ExpStruct());w = Window(); body!(w,w_ex)
 w_ex = widget(es);w = Window(); body!(w,w_ex)
 w_ex[:Freq_vals][][1][:f1][]
 w_ex[]
