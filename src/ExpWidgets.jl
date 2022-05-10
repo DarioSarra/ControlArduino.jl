@@ -91,7 +91,7 @@ end
 function Interact.widget(f::FreqStruct)
 	stim_n = labeled_widget("Select # of stim protocols between 1 and 10",spinbox;val = (1:10),
 		value = f.Stimulations > 0 ? f.Stimulations : 1)
-	coll = button("Collect stim frequencies")
+	coll = button("Prepare Stim Frequencies")
 	freq_opt = labeled_widget("Premade Stim",dropdown,
 		val = OrderedDict(
 			"Stim_1" => [high,low,mixed,low,high,mixed],
@@ -158,7 +158,7 @@ function Widgets.widget(e::ExpStruct)
 	stim_vol = labeled_widget("Number of volumes with stimulation",spinbox,value = sv)
 	unstim_vol = labeled_widget("Number of volumes without stimulation",spinbox,value = uv)
 	o = Observable{ExpStruct}(e)
-	coll = button("Prepare Exp")
+	coll = button("Prepare Experiment")
 
 	Interact.@map! o  begin
 		&coll
