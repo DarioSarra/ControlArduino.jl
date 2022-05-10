@@ -59,7 +59,12 @@ function single_stim_widget(;freq = (0,0,0,0))
 		:f2 => spinbox(value = freq[3]), :v2 => spinbox(value = freq[4]))
 	Interact.@map! o (&d[:f1], &d[:v1], &d[:f2], &d[:v2])
 	w = Interact.Widget{:Stim}(d, output = o)
-	@layout! w vbox(:f1,:v1,:f2,:v2)
+	@layout! w vbox(
+		hbox(hskip(0.5em),"HZ_1",:f1),
+		hbox(hskip(0.5em),"Vol_1",:v1),
+		hbox(hskip(0.5em),"HZ_2",:f2),
+		hbox(hskip(0.5em),"Vol_2",:v2)
+		)
 	return w
 end
 
@@ -119,13 +124,7 @@ function Interact.widget(f::FreqStruct)
 	Interact.@map! stims_layout begin
 		&stim_n
 		&freq_opt
-		hbox(
-			vbox(latex("Freq Stim1"),
-				latex("Volumes1"),
-				latex("Freq Stim2"),
-				latex("Volumes2")
-				)
-			,spins[]...)
+		vbox("Indicate frequency and # of volumes for stim 1 and 2",vskip(1em),hbox(spins[]...))
 	end
 
 	Interact.@map! o begin
