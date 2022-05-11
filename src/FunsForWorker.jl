@@ -22,11 +22,11 @@ function send_m(port,what::Vector{Int64})
     sleep(1)
 end
 
-function run_opto(Arduino_port,
-    StimVolumes,UnstimVolumes,Stimulations,
-    StimFreq1, StimDur1,
-    StimFreq2, StimDur2,
-    filename)
+function run_opto(Arduino_port::String,
+    StimVolumes::Int64,UnstimVolumes::Int64,Stimulations::Int64,
+    StimFreq1::Vector{Int64}, StimDur1::Vector{Int64},
+    StimFreq2::Vector{Int64}, StimDur2::Vector{Int64},
+    filename::String)
     # StimVolumes%(StimDur1+StimDur2) != 0 && error("amount of stimulated volumes is not a multiple of summed stim durations 1 and 2")
     port = SerialPort(Arduino_port)
     try
@@ -77,4 +77,26 @@ function run_opto(Arduino_port,
         close(port)
         println("Port $(Arduino_port) closed")
     end
+end
+
+function run_opto(ex::ExpStruct)
+    Ard = ex.Session.Arduino
+    stimvolumes = ex.StimulatedVolumes
+    unstimvolumes = ex.UnstimulatedVolumes
+    stimulations = ex.Frequencies.Stimulations
+    stimfreq1 = rm_missing(ex.Frequencies.Frequency1)
+    stimdur1 = rm_missing(ex.Frequencies.Volumes1)
+    stimfreq2 = rm_missing(ex.Frequencies.Frequency2)
+    stimdur2= rm_missing(ex.Frequencies.Volumes2)
+    filename = ex.Session.FileName
+
+    run_opto(Ard,
+        stimvolumes, unstimvolumes, stimulations,
+        stimfreq1,stimdur1,
+        stimfreq2,stimdur2,
+        filename)
+end
+
+function rm_missing(x::Vector{Union{Missing,Int64}})
+    convert(Vector{Int64}, filter(!ismissing,x))
 end

@@ -1,35 +1,67 @@
 using Revise, Interact, Blink, CSSUtil, LibSerialPort
-import Dates.today, Dates.Date
-include("StimulationStructure.jl")
+using  Distributed
+
+nprocs() != 3 && addprocs(2,exeflags="--project")
+workers()
+@everywhere using Pkg   # required
+@everywhere Pkg.activate(".")
+@everywhere using LibSerialPort
+@everywhere import Dates.today, Dates.Date
+@everywhere include("StimulationStructure.jl")
+@everywhere include("FunsForWorker.jl")
 include("StimProtocols.jl")
 include("ExpWidgets.jl")
 ##
 f = FreqStruct(s1)
 s = SessionStruct()
 es = ExpStruct(f,s,60,30)
-es.Frequencies = FreqStruct(s1)
-es.Session = SessionStruct("test",24,"COM4")
-es
+w_ex = widget(es); w = Window(); body!(w,fetch(w_ex))
 ##
-w_ses = widget(s); w = Window(); body!(w,w_ses)
-w_freq = widget(f); w = Window(); body!(w,w_freq)
+ex = w_ex[]
+running!(ex.Session.Arduino,true)
+task = @spawnat :any run_opto(ex)
+fetch(task)
+running!(ex.Session.Arduino,false)
+
 ##
-w_ex = widget(es);w = Window(); body!(w,w_ex)
-w_ex[:Freq_vals][][1][:f1][]
-w_ex[]
+ex = w_ex[]
+Ard = ex.Session.Arduino
+stimvolumes = ex.StimulatedVolumes
+unstimvolumes = ex.UnstimulatedVolumes
+stimulations = ex.Frequencies.Stimulations
+stimfreq1 = rm_missing(ex.Frequencies.Frequency1)
+stimdur1 = rm_missing(ex.Frequencies.Volumes1)
+stimfreq2 = rm_missing(ex.Frequencies.Frequency2)
+stimdur2= rm_missing(ex.Frequencies.Volumes2)
+filename = ex.Session.FileName
 ##
-opts = OrderedDict(
-d[]
+running!(Ard,true)
+task = @spawnat :any run_opto(Ard,
+    stimvolumes, unstimvolumes, stimulations,
+    stimfreq1,stimdur1,
+    stimfreq2,stimdur2,
+    filename)
+running!(Ard,false)
+fetch(task)
 ##
-opts = labeled_widget("Premade Stim",dropdown, val = OrderedDict(
-    "Stim_1" => [high,low,mixed,low,high,mixed],
-    "Stim_2" => [high,low,mixed,low,mixed,high],
-    "Stim_3" => [low,high,mixed,high,low,mixed],
-    "Stim_4" => [mixed,high,low,high,mixed,low]
-))
-FreqStruct(opts[])
+Ard  = "COM4"
+Arduino_dict[Ard]
+stimvolumes = 20
+unstimvolumes = 5
+stimulations = 6
+stimfreq1 = [12,0,4,12,0,4]
+stimdur1 = repeat([5],6)
+stimfreq2 = [0,4,12,4,12,0]
+stimdur2 = repeat([5],6)
+filename = "C:\\Users\\precl\\OneDrive\\Documents\\ArduinoData\\test.csv"
+
 ##
-f = FreqStruct(s1)
-wt = tabulator(OrderedDict("1" => widget(f), "2" => widget(FreqStruct())));
-w = Window(); body!(w,wt)
-wt[]
+running!(Ard,true)
+task = @spawnat :any run_opto(Ard,
+    stimvolumes, unstimvolumes, stimulations,
+    stimfreq1,stimdur1,
+    stimfreq2,stimdur2,
+    filename)
+##
+running!(Ard,false)
+fetch(task)

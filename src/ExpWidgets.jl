@@ -3,7 +3,7 @@ function Widgets.widget(s::SessionStruct)
 	m = labeled_widget("Subject", textbox; value = "test")
 	w = labeled_widget("Weight in g", spinbox; value = 25)
 	d = labeled_widget("Day", datepicker; value = today())
-	f = labeled_widget("Directory", textbox;value = isdir(default_dir) ? defaultdir : @__DIR__)
+	f = labeled_widget("Directory", textbox;value = isdir(default_dir) ? default_dir : @__DIR__)
 	a = labeled_widget("Serial Port",dropdown; val = get_port_list())
 
 	res = Observable{String}("Waiting for input")
@@ -158,17 +158,49 @@ function Widgets.widget(e::ExpStruct)
 	unstim_vol = labeled_widget("Number of volumes without stimulation",spinbox,value = uv)
 	o = Observable{ExpStruct}(e)
 	coll = button("Prepare Experiment")
+	start_b = button("Start Experiment")
+	stop_b = button("Stop Experiment")
+
 
 	Interact.@map! o  begin
 		&coll
 		ExpStruct(f[], s[],stim_vol[], unstim_vol[])
 	end
+
+	Interact.@on begin
+        &start_b
+		ex = o[]
+		Ard = ex.Session.Arduino
+	    stimvolumes = ex.StimulatedVolumes
+	    unstimvolumes = ex.UnstimulatedVolumes
+	    stimulations = ex.Frequencies.Stimulations
+	    stimfreq1 = rm_missing(ex.Frequencies.Frequency1)
+	    stimdur1 = rm_missing(ex.Frequencies.Volumes1)
+	    stimfreq2 = rm_missing(ex.Frequencies.Frequency2)
+	    stimdur2= rm_missing(ex.Frequencies.Volumes2)
+	    filename = ex.Session.FileName
+		running!(ex.Session.Arduino,true)
+		println("spawning at 2")
+        task = @async @spawnat 2 run_opto(Ard,
+	        stimvolumes, unstimvolumes, stimulations,
+	        stimfreq1,stimdur1,
+	        stimfreq2,stimdur2,
+	        filename)
+    end
+
+	Interact.@on begin
+        &stop_b
+		running!(o[].Session.Arduino,false)
+    end
+
 	d = OrderedDict{Any,Any}(
 		:Frequencies => f,
 		:Session => s,
 		:StimulatedVolumes => stim_vol,
 		:UnstimulatedVolumes => unstim_vol,
-		:Collect => coll
+		:Collect => coll,
+		:Start => start_b,
+		:Stop => stop_b
 		)
 
 	w = Interact.Widget{:Stims}(d, output = o)
@@ -181,7 +213,7 @@ function Widgets.widget(e::ExpStruct)
 					vskip(2em),
 					hbox(:StimulatedVolumes,hskip(1em),:UnstimulatedVolumes),
 					vskip(1em),
-					:Collect,
+					hbox(:Collect,hskip(1em),:Start,hskip(1em),:Stop),
 					),
 					hskip(1em)
 					)

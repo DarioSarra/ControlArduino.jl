@@ -1,4 +1,4 @@
-using Revise, Distributed
+using  Distributed
 nprocs() != 3 && addprocs(2,exeflags="--project")
 workers()
 @everywhere using Pkg   # required
@@ -22,7 +22,7 @@ stimdur2 = repeat([5],6)
 filename = "C:\\Users\\precl\\OneDrive\\Documents\\ArduinoData\\test.csv"
 
 ##
-@spawnat 1 running!(Ard,true)
+running!(Ard,true)
 task = @spawnat :any run_opto(Ard,
     stimvolumes, unstimvolumes, stimulations,
     stimfreq1,stimdur1,
@@ -30,6 +30,7 @@ task = @spawnat :any run_opto(Ard,
     filename)
 ##
 running!(Ard,false)
+fetch(task)
 ##
 fetch(task)
 workers()
