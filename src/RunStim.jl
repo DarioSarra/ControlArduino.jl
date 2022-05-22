@@ -21,6 +21,7 @@ function run_opto(Arduino_port,
     StimFreq1, StimDur1,
     StimFreq2, StimDur2,
     filename)
+    LightHZ = maximum(skipmissing(StimFreq1))
     # StimVolumes%(StimDur1+StimDur2) != 0 && error("amount of stimulated volumes is not a multiple of summed stim durations 1 and 2")
     port = SerialPort(Arduino_port)
     try
@@ -48,10 +49,12 @@ function run_opto(Arduino_port,
                             send_m(port,StimVolumes)
                             send_m(port,UnstimVolumes)
                             send_m(port,Stimulations)
+                            send_m(port, LightHZ)
                             send_m(port,StimFreq1)
                             send_m(port,StimDur1)
                             send_m(port,StimFreq2)
                             send_m(port,StimDur2)
+
                             sleep(0.001)
                         end
                     end
@@ -68,6 +71,8 @@ function run_opto(Arduino_port,
                 end
             end
         end
+        close(port)
+        open(port)
         close(port)
         println("Port $(Arduino_port) closed")
     end

@@ -18,13 +18,6 @@ es = ExpStruct(f,s,60,30)
 w_ex = widget(es); w = Window(); body!(w,fetch(w_ex))
 ##
 ex = w_ex[]
-running!(ex.Session.Arduino,true)
-task = @spawnat :any run_opto(ex)
-fetch(task)
-running!(ex.Session.Arduino,false)
-
-##
-ex = w_ex[]
 Ard = ex.Session.Arduino
 stimvolumes = ex.StimulatedVolumes
 unstimvolumes = ex.UnstimulatedVolumes
@@ -43,6 +36,13 @@ task = @spawnat :any run_opto(Ard,
     filename)
 running!(Ard,false)
 fetch(task)
+maximum(skipmissing(stimfreq1))
+##
+ex = w_ex[]
+running!(ex.Session.Arduino,true)
+task = @spawnat :any run_opto(ex)
+fetch(task)
+running!(ex.Session.Arduino,false)
 ##
 Ard  = "COM4"
 Arduino_dict[Ard]
