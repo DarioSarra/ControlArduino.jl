@@ -77,6 +77,8 @@ function run_opto(Arduino_port::String,
             end
         end
         close(port)
+        open(port)
+        close(port)
         println("Port $(Arduino_port) closed")
     end
 end
