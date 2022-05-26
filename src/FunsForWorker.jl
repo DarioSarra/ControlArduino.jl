@@ -40,7 +40,7 @@ function run_opto(Arduino_port::String,
     LibSerialPort.set_speed(port,115200)
     LibSerialPort.set_flow_control(port, rts = SP_RTS_ON,dtr = SP_DTR_ON) ## Necessary to reset arduino upon opening the port
     println("Opening Port")
-    println("Status $(running(Arduino_port))")
+    println("Running Status $(running(Arduino_port))")
     task_begun = false
     @async begin
         while running(Arduino_port)
@@ -51,7 +51,7 @@ function run_opto(Arduino_port::String,
                     sleep(0.001)
                     if contains(m,"Waiting for Inputs")
                         @async begin
-                            println("Sending inputs: stimvolumes = $stimvolumes, unstimvolumes = $unstimvolumes")
+                            println("Sending inputs: stimvolumes = $StimVolumes, unstimvolumes = $UnstimVolumes")
                             send_m(port,StimVolumes)
                             send_m(port,UnstimVolumes)
                             send_m(port,Stimulations)
