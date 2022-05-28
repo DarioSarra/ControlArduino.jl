@@ -8,10 +8,11 @@ void loop() {
   // put your main code here, to run repeatedly:
 
 
+//digitalWrite(53,HIGH);
 digitalWrite(53,LOW);
-delay(5);
+delay(1205);// delay for full emission at any power, at powers higher than 5mW bleed through light appears immediately
 digitalWrite(53,LOW);
-delay(10);
+delay(83);
 
 
 }
