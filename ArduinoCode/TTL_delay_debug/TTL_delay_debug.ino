@@ -10,7 +10,8 @@ void loop() {
 
 //digitalWrite(53,HIGH);
 digitalWrite(53,LOW);
-delay(1205);// delay for full emission at any power, at powers higher than 5mW bleed through light appears immediately
+//delay(1205);// delay for full emission at any power, at powers higher than 5mW bleed through light appears immediately
+delay(10);
 digitalWrite(53,LOW);
 delay(83);
 
