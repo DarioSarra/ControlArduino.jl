@@ -1,18 +1,27 @@
 using Revise, Interact, Blink, CSSUtil, LibSerialPort
 using  Distributed
 
+# to control maintain an oper communication Arduino without freezing the current terminal we need additional processes
 nprocs() != 3 && addprocs(2,exeflags="--project")
 workers()
-@everywhere using Pkg   # required
+#= every process has an independet library upload. We can use @everywhere to load libraries in all processes
+the first step is always to activate the PKG library on the new processes, or we can't upload anything else=#
+@everywhere using Pkg   
 @everywhere Pkg.activate(".")
+# The following libraries and functions need to work on the other processes, in parallel with the main one
 @everywhere using LibSerialPort
 @everywhere import Dates.today, Dates.Date
+@everywhere include("ArduinoCommunication.jl")
 @everywhere include("StimulationStructure.jl")
-@everywhere include("FunsForWorker.jl")
-include("StimProtocols.jl")
-include("ExpWidgets.jl")
+# the following functions and values define the GUI and are only loaded in the main process 
+include("Premade_Stim_Protocols.jl")
+include("GUI_elements.jl")
 ##
+#= A gui is build combining multiple structures. These structures distinguished by the type of info about 
+the experiment that they define.=# 
+# The Frequencies structure defines 
 f = FreqStruct(s1)
+#The session structure has info about the day, subject name and it combinesthem to define the output file location
 s = SessionStruct()
 es = ExpStruct(f,s,60,30)
 w_ex = widget(es); w = Window(); body!(w,fetch(w_ex))
