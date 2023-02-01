@@ -8,7 +8,6 @@ ui = button()
 ui[]
 w = Window()
 ##
-/Users/dariosarra/Desktop
 folders = Dict("ArduinoControlDir" => joinpath("Users","dariosarra","Desktop","ArduinoControlDir"))
 dir_ui = dropdown(folders);
 mouseid_ui = textbox("mouse_id");
