@@ -12,7 +12,9 @@ the first step is always to activate the PKG library on the new processes, or we
 @everywhere import Dates.today, Dates.Date
 
 # The following files contain functions needed in all processes. Files have to be loaded in order: Structures followed by ArduinoCommunication
-@everywhere include(joinpath("DataStructures","Structures.jl"))
+@everywhere include(joinpath("DataStructures","SessionFile_structure.jl"))
+@everywhere include(joinpath("DataStructures","Frequencies_structure.jl"))
+@everywhere include(joinpath("DataStructures","Experiment_structure.jl"))
 @everywhere include(joinpath("ArduinoCommunication","SerialPortsManager.jl"))
 @everywhere include(joinpath("ArduinoCommunication","MessageEncoding.jl"))
 @everywhere include(joinpath("ArduinoCommunication","ArduinoCommunication.jl"))
