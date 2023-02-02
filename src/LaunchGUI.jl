@@ -14,6 +14,8 @@ the first step is always to activate the PKG library on the new processes, or we
 
 # The following files contain functions needed in all processes. Files have to be loaded in order: Structures followed by ArduinoCommunication
 @everywhere include(joinpath("DataStructures","Structures.jl"))
+@everywhere include(joinpath("ArduinoCommunication","SerialPortsManager.jl"))
+@everywhere include(joinpath("ArduinoCommunication","MessageEncoding.jl"))
 @everywhere include(joinpath("ArduinoCommunication","ArduinoCommunication.jl"))
 
 # the following functions and values define the GUI and are only loaded in the main process 
