@@ -1,5 +1,4 @@
-using Revise, Interact, Blink, CSSUtil, LibSerialPort
-using Distributed
+using Revise, Interact, Blink, CSSUtil, LibSerialPort, Distributed
 ##
 # to control maintain an open communication Arduino without freezing the current terminal we need additional processes
 nprocs() != 3 && addprocs(2, exeflags="--project")
