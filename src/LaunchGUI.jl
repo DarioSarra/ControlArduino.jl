@@ -20,7 +20,11 @@ the first step is always to activate the PKG library on the new processes, or we
 
 # the following functions and values define the GUI and are only loaded in the main process 
 include(joinpath("GUI", "Premade_Stim_Protocols.jl"))
-include(joinpath("GUI", "GUI_elements.jl"))
+include(joinpath("GUI", "GUI_utilities.jl"))
+include(joinpath("GUI", "SessionWidget.jl"))
+include(joinpath("GUI", "FrequencyWidget.jl"))
+include(joinpath("GUI", "ExperimentWidget.jl"))
+# include(joinpath("GUI", "GUI_elements.jl"))
 ##
 #= A gui is build combining multiple structures. These structures distinguished by the type of info about 
 the experiment that they define.=#
