@@ -1,5 +1,4 @@
 using Revise, Interact, Blink, CSSUtil, LibSerialPort, Distributed
-##
 # to control maintain an open communication Arduino without freezing the current terminal we need additional processes
 nprocs() != 3 && addprocs(2, exeflags="--project")
 workers()
@@ -43,4 +42,3 @@ stimdur1 = rm_missing(ex.Frequencies.Volumes1)
 stimfreq2 = rm_missing(ex.Frequencies.Frequency2)
 stimdur2 = rm_missing(ex.Frequencies.Volumes2)
 filename = ex.Session.FileName
-##

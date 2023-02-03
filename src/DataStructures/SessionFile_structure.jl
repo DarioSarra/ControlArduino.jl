@@ -29,7 +29,12 @@ function SessionStruct(MouseID::String, Weight::Real,Today::Date,Directory::Stri
     filename = createfilename(MouseID, replace(string(Today), "-"=>""), Directory)
     SessionStruct(MouseID,Weight,string(Today), Directory, filename, Arduino)
 end
-SessionStruct(MouseID::String,Weight::Real,Arduino::String) = SessionStruct(MouseID, Weight,today(),isdir(default_dir) ? default_dir : @__DIR__,Arduino)
+
+#create a session structure with a safe alternative in case default path is not available inside a folder in the package src/GUI/Outputs
+function SessionStruct(MouseID::String,Weight::Real,Arduino::String)
+    folder = isdir(default_dir) ? default_dir : joinpath(@__DIR__,"Outputs")
+    SessionStruct(MouseID, Weight,today(),folder,Arduino)
+end
 
 #All field can be created with missing values and populated afterwards
 SessionStruct(missing) = SessionStruct(missing,missing,missing,missing,missing, missing)

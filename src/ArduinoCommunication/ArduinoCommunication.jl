@@ -12,6 +12,7 @@ function open_communication(Arduino_port)
     LibSerialPort.set_flow_control(port, rts = SP_RTS_ON,dtr = SP_DTR_ON) ## Necessary to reset arduino upon opening the port
     println("Opening Port")
     println("Running Status $(running(Arduino_port))")
+    return port
 end
 
 #This function open communication with arduino and send information about the stimulation parameters in a predermined order
@@ -22,24 +23,12 @@ function run_opto(Arduino_port::String,
     filename::String)
     # StimVolumes%(StimDur1+StimDur2) != 0 && error("amount of stimulated volumes is not a multiple of summed stim durations 1 and 2")
     LightHZ = maximum(skipmissing(StimFreq1))
-    open_communication(Arduino_port)
-    # port = SerialPort(Arduino_port)
-    # try
-    #     open(port)
-    # catch e
-    #     println(e)
-    #     close(port)
-    #     error("unable to open port")
-    # end
-    # LibSerialPort.set_speed(port,115200)
-    # LibSerialPort.set_flow_control(port, rts = SP_RTS_ON,dtr = SP_DTR_ON) ## Necessary to reset arduino upon opening the port
-    # println("Opening Port")
-    # println("Running Status $(running(Arduino_port))")
+    port = open_communication(Arduino_port)
     task_begun = false # variable to control writing on the saving file
     @async begin # @async macro ensures workers don't freeze waiting for completion of steps
         #= The while loop used to close port via the Arduino controller booleans. 
         This has to be set to true before launching the function and set to false buy another worker to stop the function=#
-        while running(Arduino_port) 
+        while running(Arduino_port)
             @async begin
                 # While running(Arduino_port) we constantly read messages from arduino
                 if bytesavailable(port) > 0
