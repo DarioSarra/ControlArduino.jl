@@ -45,4 +45,5 @@ stimfreq1 = rm_missing(ex.Frequencies.Frequency1)
 stimdur1 = rm_missing(ex.Frequencies.Volumes1)
 stimfreq2 = rm_missing(ex.Frequencies.Frequency2)
 stimdur2 = rm_missing(ex.Frequencies.Volumes2)
+maskled = rm_missing(ex.Frequencies.MaskLed)
 filename = ex.Session.FileName
