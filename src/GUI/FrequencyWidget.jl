@@ -12,9 +12,9 @@ function single_stim_widget(;freq = (0,0,0,0,0))
 	w = Interact.Widget{:Stim}(d, output = o)
 	@layout! w vbox(
 		hbox(hskip(0.5em),"HZ_1",:f1),
-		hbox(hskip(0.5em),"Vol_1",:v1),
+		hbox(hskip(0.5em),"ms_1",:v1),
 		hbox(hskip(0.5em),"HZ_2",:f2),
-		hbox(hskip(0.5em),"Vol_2",:v2),
+		hbox(hskip(0.5em),"ms_2",:v2),
 		hbox(hskip(0.5em),"HZ_LED",:ml)
 		)
 	return w

@@ -36,6 +36,7 @@ int           idx;              // variable that ensures looping on the right st
 
 unsigned long StimOnset      = 0;
 int           CurrentHZ      = 0;        // Saving Variable
+int           CurrentDur     = 0;        // Saving Variable
 int           CurrentLED     = 0;        // Saving Variable
 int           StimFreq1[10];
 int           StimDur1[10];
@@ -85,7 +86,7 @@ void setup() {
   
 
   Serial.println(String("All Good:") + ' ' + String(millis())); // Signal that all is well
-  Serial.println("Volume,Time,State,Hz, MaskLED, StimCount");
+  Serial.println("Volume,Time,State,Hz, Dur, MaskLED, StimCount");
   delay(10);
 }
 
@@ -104,8 +105,8 @@ updatevolumes();// This counts TTLs coming from the scanner to
 
     case 2:// This is to stimulate for StimVolumes number: stimulation period
     idx = StimCount%Stimulations; // return the correct idx to select the parameter once all stimulation prtocols have been run
-    // stimtiming is a function that given two stim frequencies and duration activate the laser counting the volumes acquired
-    stimtiming((VolumeCount - StimVolumeCount),StimFreq1[idx],StimDur1[idx],StimFreq2[idx],StimDur2[idx]);
+    // stimtiming is a function that given two stim frequencies and duration activate the laser counting the time from stim onset
+    stimtiming(StimFreq1[idx],StimDur1[idx],StimFreq2[idx],StimDur2[idx]);
     // masking light continous stimulation at max hearts throughout the stimulation period
     stimatfreq(StimOnset,LightHZ[idx],Pulse,LightPin);
     CurrentLED = LightHZ[idx];
@@ -113,6 +114,7 @@ updatevolumes();// This counts TTLs coming from the scanner to
     if (VolumeCount - StimVolumeCount >= StimVolumes) {
       EndingCount = VolumeCount;
       CurrentHZ = 0;
+      CurrentDur = 0;
       CurrentLED = 0;
       State = 3;
     }
@@ -136,6 +138,7 @@ void savestatus () {
   String(millis()) + ',' + \
   String(State) + ',' + \
   String(CurrentHZ) + ',' + \
+  String(CurrentDur) + ',' + \
   String(CurrentLED) + ',' + \
   String(StimCount)
   );
@@ -165,15 +168,15 @@ void stimatfreq (long onset, int freq, int pulse, int pin) {
   }
 }
 
-// Function to alternate between 2 stimulation frequencies one can be 0
-void stimtiming (int volumecount, int hz1, int dur1, int hz2, int dur2) {
-  if ((volumecount % (dur1 + dur2)) < dur1) {
+// Function to alternate between 2 stimulation frequencies over time; one can be 0
+void stimtiming (int hz1, int dur1, int hz2, int dur2) {
+  if (((millis() - StimOnset) % (dur1 + dur2)) < dur1) {
     stimatfreq (StimOnset, hz1, Pulse, LaserPin);
     CurrentHZ = hz1;
+    CurrentDur = dur1;
   }
   else {
     stimatfreq (StimOnset, hz2, Pulse, LaserPin);
-    CurrentHZ = hz2;
   }
 }
 
