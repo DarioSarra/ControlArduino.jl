@@ -17,6 +17,7 @@ end
 
 #This function open communication with arduino and send information about the stimulation parameters in a predermined order
 function run_opto(Arduino_port::String,
+    PreStim::Int64,InStim::Int64,PostStim::Int64,
     StimVolumes::Int64,UnstimVolumes::Int64,Stimulations::Int64,
     StimFreq1::Vector{Int64}, StimDur1::Vector{Int64},
     StimFreq2::Vector{Int64}, StimDur2::Vector{Int64},
@@ -40,6 +41,9 @@ function run_opto(Arduino_port::String,
                     if contains(m,"Waiting for Inputs")
                         @async begin
                             println("Sending inputs: stimvolumes = $StimVolumes, unstimvolumes = $UnstimVolumes")
+                            send_m(port,PreStim) # Volumes before stimulation
+                            send_m(port,InStim) # Volumes to stimulate
+                            send_m(port,PostStim) # Volumes after stimulation
                             send_m(port,StimVolumes) # Num of volumes to stimulate
                             send_m(port,UnstimVolumes) # Num of volumes to wait before and after the stimulation. It doubles in between two stimulations.
                             send_m(port,Stimulations) # Num of stimulation protocols to feed. Arduino use this num to set the length of vectors storing info
@@ -87,6 +91,9 @@ end
     The structure has multiple fields and subfields, which is useful to organise the GUI, but can become verbose to call function on it=#
 function run_opto(ex::ExpStruct)
     Ard = ex.Session.Arduino
+    prestim = ex.PreStimVolumes
+    instim = ex.InStimVolumes
+    poststim = ex.PostStimVolumes
     stimvolumes = ex.StimulatedVolumes
     unstimvolumes = ex.UnstimulatedVolumes
     stimulations = ex.Frequencies.Stimulations
@@ -94,12 +101,15 @@ function run_opto(ex::ExpStruct)
     stimdur1 = rm_missing(ex.Frequencies.Volumes1)
     stimfreq2 = rm_missing(ex.Frequencies.Frequency2)
     stimdur2= rm_missing(ex.Frequencies.Volumes2)
+    ledfreq = rm_missing(ex.Frequencies.MaskLed)
     filename = ex.Session.FileName
 
     run_opto(Ard,
+        prestim, instim, poststim,
         stimvolumes, unstimvolumes, stimulations,
         stimfreq1,stimdur1,
         stimfreq2,stimdur2,
+        ledfreq,
         filename)
 end
 

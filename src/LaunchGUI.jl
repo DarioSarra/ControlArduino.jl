@@ -32,18 +32,36 @@ the experiment that they define.=#
 f = FreqStruct(s1)
 #The session structure has info about the day, subject name and it combinesthem to define the output file location
 s = SessionStruct()
-es = ExpStruct(f, s, 60, 30)
+es = ExpStruct(f, s, 60,600,60,10, 50)
 w_ex = widget(es);
 w = Window();body!(w, fetch(w_ex));
 ##
 ex = w_ex[]
+run_opto(ex)
 Ard = ex.Session.Arduino
 stimvolumes = ex.StimulatedVolumes
 unstimvolumes = ex.UnstimulatedVolumes
 stimulations = ex.Frequencies.Stimulations
+prestim = ex.PreStimVolumes
+instim = ex.InStimVolumes
+poststim = ex.PostStimVolumes
 stimfreq1 = rm_missing(ex.Frequencies.Frequency1)
 stimdur1 = rm_missing(ex.Frequencies.Volumes1)
 stimfreq2 = rm_missing(ex.Frequencies.Frequency2)
 stimdur2 = rm_missing(ex.Frequencies.Volumes2)
 maskled = rm_missing(ex.Frequencies.MaskLed)
 filename = ex.Session.FileName
+
+Ard = ex.Session.Arduino
+    prestim = ex.PreStimVolumes
+    instim = ex.InStimVolumes
+    poststim = ex.PostStimVolumes
+    stimvolumes = ex.StimulatedVolumes
+    unstimvolumes = ex.UnstimulatedVolumes
+    stimulations = ex.Frequencies.Stimulations
+    stimfreq1 = rm_missing(ex.Frequencies.Frequency1)
+    stimdur1 = rm_missing(ex.Frequencies.Volumes1)
+    stimfreq2 = rm_missing(ex.Frequencies.Frequency2)
+    stimdur2= rm_missing(ex.Frequencies.Volumes2)
+    ledfreq = rm_missing(ex.Frequencies.MaskLed)
+    filename = ex.Session.FileName

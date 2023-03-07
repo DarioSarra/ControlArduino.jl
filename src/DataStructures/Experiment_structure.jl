@@ -1,12 +1,15 @@
 mutable struct ExpStruct
     Frequencies::FreqStruct
     Session::SessionStruct
+    PreStimVolumes::Union{Int64,Missing}
+    InStimVolumes::Union{Int64,Missing}
+    PostStimVolumes::Union{Int64,Missing}
     StimulatedVolumes::Union{Int64,Missing}
     UnstimulatedVolumes::Union{Int64,Missing}
 end
 
 function ExpStruct(missing)
-    ExpStruct(FreqStruct(),SessionStruct(),missing,missing)
+    ExpStruct(FreqStruct(),SessionStruct(),missing,missing,missing,missing,missing)
 end
 
 ExpStruct()= ExpStruct(missing)
