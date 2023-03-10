@@ -62,12 +62,12 @@ void setup() {
   Serial.println(String("Waiting for Inputs"));
   delay(100);
   
-  WaitForNumericalInput(PreStimVolumes);
-  WaitForNumericalInput(InStimVolumes);
-  WaitForNumericalInput(PostStimVolumes);
-  WaitForNumericalInput(StimVolumes);
-  WaitForNumericalInput(UnstimVolumes);
-  WaitForNumericalInput(Stimulations);
+  WaitForNumericalInput(PreStimVolumes, "PreStimVolumes");
+  WaitForNumericalInput(InStimVolumes, "InStimVolumes");
+  WaitForNumericalInput(PostStimVolumes, "PostStimVolumes");
+  WaitForNumericalInput(StimVolumes, "StimVolumes");
+  WaitForNumericalInput(UnstimVolumes, "UnstimVolumes");
+  WaitForNumericalInput(Stimulations, "Stimulations");
  
   StimOnset = millis();
   // We use the -1 as a flag value indicating that it has to be replaced with a serial port input.
@@ -78,11 +78,11 @@ void setup() {
   memset(StimDur2,-1,Stimulations*sizeof(int));
   memset(LightHZ,-1,Stimulations*sizeof(int));
 
-  WaitForIntArray(StimFreq1,Stimulations);
-  WaitForIntArray(StimDur1,Stimulations);
-  WaitForIntArray(StimFreq2,Stimulations);
-  WaitForIntArray(StimDur2,Stimulations);
-  WaitForIntArray(LightHZ,Stimulations);
+  WaitForIntArray(StimFreq1,Stimulations, "Hz_1");
+  WaitForIntArray(StimDur1,Stimulations, "mS_1");
+  WaitForIntArray(StimFreq2,Stimulations, "Hz_2");
+  WaitForIntArray(StimDur2,Stimulations, "mS_2");
+  WaitForIntArray(LightHZ,Stimulations, "Hz_LED");
   
 
   Serial.println(String("All Good:") + ' ' + String(millis())); // Signal that all is well
@@ -236,17 +236,17 @@ void stimtiming (int hz1, int dur1, int hz2, int dur2) {
   return dataNumber;
 }
 
-/* -------------------- Function to send variables as a csv string -------------------- 
+/* -------------------- Function to receive variables as a message from julia -------------------- 
 the & symbol enable the call-by-reference option otherwise it would only copy x value*/
-void WaitForNumericalInput(int &x){
+void WaitForNumericalInput(int &x, String msg){
   while (x == WaitingIntVal) {x = SerialRead_Int_Value();}
-  Serial.println(String(x) + ' ' + String(millis())); // Signal that all is well
+  Serial.println(msg + ' ' + String(x)); // Signal that all is well
 }
 
-void WaitForIntArray(int x[], int Size) { //In C and C++ there is no way (no way) that a function can know the size of an array unless you tell it. So the array size has to be a separate argument.
+void WaitForIntArray(int x[], int Size, String msg) { //In C and C++ there is no way (no way) that a function can know the size of an array unless you tell it. So the array size has to be a separate argument.
   for (int i = 0; i < Size; i++){
     while (x[i] == WaitingIntVal) {x[i] = SerialRead_Int_Value();}
-    Serial.print(String(x[i])+ ' ');
+    Serial.print(msg + ' ' + String(x[i]) + "; ");
   }
   Serial.println();
 }
