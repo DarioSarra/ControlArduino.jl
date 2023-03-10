@@ -21,6 +21,11 @@ FreqStruct(Frequency1::Int64, Volumes1::Int64,Frequency2::Int64,Volumes2::Int64,
 #A frequency structure can be initiated by a tuple of 4 Integer, which fall backs on the single value initiation system
 FreqStruct(t::NTuple{5,Int64}) = FreqStruct(t..., 1)
 
+function equal_length(t::NTuple{4,Vector{Int64}})
+    l = length(t[1])
+    all([length(x) == l for x in t])
+end
+
 #A frequency structure can be initiated by a tuple of 4 vectors, provided the vectors are the same length
 function FreqStruct(t::NTuple{5,Vector{Int64}})
     equal_length(t) || error("feeded unequal length arrays")

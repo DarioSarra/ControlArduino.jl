@@ -13,6 +13,7 @@ the first step is always to activate the PKG library on the new processes, or we
 # The following files contain functions needed in all processes. Files have to be loaded in order: Structures followed by ArduinoCommunication
 @everywhere include(joinpath("DataStructures","SessionFile_structure.jl"))
 @everywhere include(joinpath("DataStructures","Frequencies_structure.jl"))
+@everywhere include(joinpath("DataStructures","Periods_structure.jl"))
 @everywhere include(joinpath("DataStructures","Experiment_structure.jl"))
 @everywhere include(joinpath("ArduinoCommunication","SerialPortsManager.jl"))
 @everywhere include(joinpath("ArduinoCommunication","MessageEncoding.jl"))
@@ -23,21 +24,25 @@ include(joinpath("GUI", "Premade_Stim_Protocols.jl"))
 include(joinpath("GUI", "GUI_utilities.jl"))
 include(joinpath("GUI", "SessionWidget.jl"))
 include(joinpath("GUI", "FrequencyWidget.jl"))
+include(joinpath("GUI", "PeriodWidget.jl"))
 include(joinpath("GUI", "ExperimentWidget.jl"))
-# include(joinpath("GUI", "GUI_elements.jl"))
 ##
 #= A gui is build combining multiple structures. These structures distinguished by the type of info about 
 the experiment that they define.=#
-# The Frequencies structure defines 
-f = FreqStruct(s1)
+# The Frequencies structure defines
+f = FreqStruct()
 #The session structure has info about the day, subject name and it combinesthem to define the output file location
 s = SessionStruct()
-es = ExpStruct(f, s, 60,600,60,10, 50)
+p = PeriodStruct(60,600,60,10, 50)
+es = ExpStruct(s,p,f)
+# es = ExpStruct(f, s, 60,600,60,10, 50)
 w_ex = widget(es);
 w = Window();body!(w, fetch(w_ex));
 ##
+println(w_ex[].Frequencies)
+
+##
 ex = w_ex[]
-run_opto(ex)
 Ard = ex.Session.Arduino
 stimvolumes = ex.StimulatedVolumes
 unstimvolumes = ex.UnstimulatedVolumes
@@ -52,10 +57,8 @@ stimdur2 = rm_missing(ex.Frequencies.Volumes2)
 maskled = rm_missing(ex.Frequencies.MaskLed)
 filename = ex.Session.FileName
 ##
-t1 = dom"some"
-t2 = "more"
-attempt = vbox(t1,vskip(0.1em),t2)
-body!(w2, attempt);
-##
-w2 = Window();
+p = PeriodStruct()
+w_p = widget(p)
+w2 = Window();body!(w2, fetch(w_p));
 
+w_p[]
