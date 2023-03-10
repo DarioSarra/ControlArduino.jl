@@ -51,17 +51,11 @@ stimfreq2 = rm_missing(ex.Frequencies.Frequency2)
 stimdur2 = rm_missing(ex.Frequencies.Volumes2)
 maskled = rm_missing(ex.Frequencies.MaskLed)
 filename = ex.Session.FileName
+##
+t1 = dom"some"
+t2 = "more"
+attempt = vbox(t1,vskip(0.1em),t2)
+body!(w2, attempt);
+##
+w2 = Window();
 
-Ard = ex.Session.Arduino
-    prestim = ex.PreStimVolumes
-    instim = ex.InStimVolumes
-    poststim = ex.PostStimVolumes
-    stimvolumes = ex.StimulatedVolumes
-    unstimvolumes = ex.UnstimulatedVolumes
-    stimulations = ex.Frequencies.Stimulations
-    stimfreq1 = rm_missing(ex.Frequencies.Frequency1)
-    stimdur1 = rm_missing(ex.Frequencies.Volumes1)
-    stimfreq2 = rm_missing(ex.Frequencies.Frequency2)
-    stimdur2= rm_missing(ex.Frequencies.Volumes2)
-    ledfreq = rm_missing(ex.Frequencies.MaskLed)
-    filename = ex.Session.FileName

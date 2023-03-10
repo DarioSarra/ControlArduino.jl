@@ -7,13 +7,13 @@ function Widgets.widget(e::ExpStruct)
 	sv = ismissing(e.StimulatedVolumes) ? 0 : e.StimulatedVolumes
 	uv = ismissing(e.UnstimulatedVolumes) ? 0 : e.UnstimulatedVolumes
 
-	pre_stim = labeled_widget("Volumes to wait before stimulation",spinbox,value = pre_s)
-	in_stim = labeled_widget("Volumes to stimulate with parameters below",spinbox,value = in_s)
-	post_stim = labeled_widget("Volumes not to stimulate in the end",spinbox,value = post_s)
-	stim_vol = labeled_widget("Number of volumes with stimulation",spinbox,value = sv)
-	unstim_vol = labeled_widget("Number of volumes without stimulation",spinbox,value = uv)
+	pre_stim = labeled_widget("Pre-stimulation period",spinbox,value = pre_s)
+	in_stim = labeled_widget("Stimulation period",spinbox,value = in_s)
+	post_stim = labeled_widget("Post-stimulation period",spinbox,value = post_s)
+	stim_vol = labeled_widget("Volumes with laser ON in stimulation period",spinbox,value = sv)
+	unstim_vol = labeled_widget("Volumes with laser OFF in stimulation period",spinbox,value = uv)
 	o = Observable{ExpStruct}(e)
-	coll = button("Prepare Experiment")
+	coll = button("Prepare Periods")
 	start_b = button("Start Experiment")
 	stop_b = button("Stop Experiment")
 
@@ -71,16 +71,23 @@ function Widgets.widget(e::ExpStruct)
 	w = Interact.Widget{:Stims}(d, output = o)
 	@layout! w hbox(hskip(1em),
 					vbox(
-					vskip(1em),
-					:Session,
-					vskip(1em),
-					:Frequencies,
-					vskip(2em),
-					hbox(:PreStim,hskip(1em), :InStim, hskip(1em), :PostStim),
-					vskip(1em),
-					hbox(:StimulatedVolumes,hskip(1em),:UnstimulatedVolumes),
-					vskip(1em),
-					hbox(:Collect,hskip(1em),:Start,hskip(1em),:Stop),
+						vskip(1em),
+						"Insert session info to store csv output file",
+						:Session,
+						vskip(2em),
+						"Define overall run structure, with # volumes per period (before, during, and after stimulation)",
+						vskip(0.5em),
+						hbox(:PreStim,hskip(1em), :InStim, hskip(1em), :PostStim),
+						vskip(1em),
+						"Define number of volumes to alternate laser on-off during the stimulation period",
+						vskip(0.5em),
+						hbox(:StimulatedVolumes,hskip(1em),:UnstimulatedVolumes),
+						vskip(0.1em),
+						:Collect,
+						vskip(2em),
+						:Frequencies,
+						vskip(2em),
+						hbox(:Start,hskip(1em),:Stop),
 					),
 					hskip(1em)
 					)

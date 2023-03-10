@@ -11,11 +11,11 @@ function single_stim_widget(;freq = (0,0,0,0,0))
 	Interact.@map! o (&d[:f1], &d[:v1], &d[:f2], &d[:v2])
 	w = Interact.Widget{:Stim}(d, output = o)
 	@layout! w vbox(
-		hbox(hskip(0.5em),"HZ_1",:f1),
-		hbox(hskip(0.5em),"ms_1",:v1),
-		hbox(hskip(0.5em),"HZ_2",:f2),
-		hbox(hskip(0.5em),"ms_2",:v2),
-		hbox(hskip(0.5em),"HZ_LED",:ml)
+		hbox(hskip(0.5em),"Hz_1",:f1),
+		hbox(hskip(0.5em),"mS_1",:v1),
+		hbox(hskip(0.5em),"Hz_2",:f2),
+		hbox(hskip(0.5em),"mS_2",:v2),
+		hbox(hskip(0.5em),"Hz_LED",:ml)
 		)
 	return w
 end
@@ -52,10 +52,10 @@ function Interact.widget(f::FreqStruct)
 	coll = button("Prepare Stim Frequencies")
 	freq_opt = labeled_widget("Premade Stim",dropdown,
 		val = OrderedDict(
-			"Stim_1" => [high,low,mixed,low,high,mixed],
-			"Stim_2" => [high,low,mixed,low,mixed,high],
-			"Stim_3" => [low,high,mixed,high,low,mixed],
-			"Stim_4" => [mixed,high,low,high,mixed,low]
+			"Stim_1" => [high,low,medium,low,high,medium],
+			"Stim_2" => [high,low,medium,low,medium,high],
+			"Stim_3" => [low,high,medium,high,low,medium],
+			"Stim_4" => [medium,high,low,high,medium,low]
 			)
 	)
 
@@ -77,7 +77,10 @@ function Interact.widget(f::FreqStruct)
 	Interact.@map! stims_layout begin
 		&stim_n
 		&freq_opt
-		vbox("Indicate frequency and # of volumes for stim 1 and 2",vskip(1em),hbox(spins[]...))
+		vbox("Indicate frequency and time (ms) for stim 1 and 2",
+			vskip(0.1em),
+			"The sum of ms_1 and ms_2 should match acquisition time of 1 volume",
+			hbox(spins[]...))
 	end
 
 	Interact.@map! o begin
@@ -94,6 +97,7 @@ function Interact.widget(f::FreqStruct)
 	)
 	w = Interact.Widget{:Stims}(d, output = o)
 	@layout! w vbox(vskip(1em),
+		"Specify the stimulation frequency to use during laser on in the stimulation period",
 		hbox(stim_n,hskip(1em),:Opts),
 		vskip(1em),
 		stims_layout,

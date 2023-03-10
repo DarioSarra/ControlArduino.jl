@@ -5,18 +5,6 @@
 int            LaserPin     = 53; // laser stimulation
 int            LightPin     = 51;
 
-// Temporary variables for debugging
-boolean        Periodic      = true;
-unsigned long  Start         = millis();
-int            Begin         = -1;
-
-// Condition variables
-boolean        DuringStim    = true;
-boolean        Stim          = true;     // Control variable to skipstim completely
-boolean        StimBlock     = true;     // variable to control blocks of stim and no stim
-
-
-
 // Volume count variables
 bool           NewVolume      = false;
 int            VolumeCount    = 0;              // Counter of the images acquired by the scanner
@@ -25,14 +13,14 @@ int            StimVolumeCount= 0;              // Stores frame counter at the l
 int            EndingCount    = 0;              // Stores frame counter at the latest stim block end
 
 // States to control no stim and stim periods throughout the run
-int            StimState      = 1;              // Switch StimState variable
-int            RunState       = 1;              // Switch StimState variable
+int            StimState      = 1;              // Switch Stimulation State (laser on-off)
+int            RunState       = 1;              // Switch Run State (Pre, during and post stim) 
 
 // Input volume counts
 int            WaitingIntVal   = -1;             // this is a place holder for int values that needs to be transmitted
 int            PreStimVolumes  = WaitingIntVal;  // Number of volumes to wait before stim
 int            InStimVolumes   = WaitingIntVal;  // Number of volumes to use stimulation
-int            PostStimVolumes = WaitingIntVal;  // Number of volumes to wait before stim
+int            PostStimVolumes = WaitingIntVal;  // Number of volumes to wait after stim
 int            StimVolumes     = WaitingIntVal;  // Number of volumes to stimulate in Stim phase
 int            UnstimVolumes   = WaitingIntVal;  // Number of volumes NOT to stimulate in Stim phase
 
@@ -42,15 +30,18 @@ int           StimCount    = 0; // variable to keep track of the current run as 
 int           Stimulations = WaitingIntVal; // variable that determines how many different type of stimulations are to be run
 int           idx;              // variable that ensures looping on the right stim indexes once the Stimulation count is more than the stimulation types
 unsigned long StimOnset      = 0;
-int           CurrentHZ      = 0;        // Saving Variable
-int           CurrentDur     = 0;        // Saving Variable
-int           CurrentLED     = 0;        // Saving Variable
 int           StimFreq1[10];
 int           StimDur1[10];
 int           StimFreq2[10];
 int           StimDur2[10];
 int           Pulse          = 10;       // PulseWidth
 int           LightHZ[10];//        = WaitingIntVal;  // Masking Light freq
+
+// Saving variables
+int           CurrentHZ      = 0;
+int           CurrentDur     = 0;
+int           CurrentLED     = 0;
+int           CurrentStim    = 0;
 
 
 
@@ -112,21 +103,16 @@ switch(RunState) {
   break;
   
   case 2:
+  // Check if you are still in the stim period or go to run state 3
   if (VolumeCount >= PreStimVolumes + InStimVolumes) {
     RunState = 3;
+   CurrentStim = 0;
     }
     // Until VolumeCount = PreStimVolumes + InStimVolumes goes in the stim switch loop
     switch (StimState) {
-//      case 1: // This is to wait UnstimVolumes number before stimulating
-//      if (VolumeCount - RunVolumeCount >= UnstimVolumes) {
-//        StimOnset = millis();
-//        StimVolumeCount = VolumeCount;
-//        StimState = 2;
-//      }
-//      break;
-  
       case 1:// This is to stimulate for StimVolumes number: stimulation period
       idx = StimCount%Stimulations; // return the correct idx to select the parameter once all stimulation prtocols have been run
+      CurrentStim = StimCount +1;
       // stimtiming is a function that given two stim frequencies and duration activate the laser counting the time from stim onset
       stimtiming(StimFreq1[idx],StimDur1[idx],StimFreq2[idx],StimDur2[idx]);
       // masking light continous stimulation at max hearts throughout the stimulation period
@@ -169,7 +155,7 @@ void savestatus () {
   String(CurrentHZ) + ',' + \
   String(CurrentDur) + ',' + \
   String(CurrentLED) + ',' + \
-  String(StimCount)
+  String(CurrentStim)
   );
 }
 
