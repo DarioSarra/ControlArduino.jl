@@ -123,14 +123,13 @@ switch(RunState) {
         EndingCount = VolumeCount;
         CurrentHZ = 0;
         CurrentDur = 0;
-        CurrentLED = 0;
         StimState = 2;
       }
       break;
 
       case 2:// This is to wait UnstimVolumes number after stimulating
       digitalWrite(LaserPin, LOW);
-      digitalWrite(LightPin, LOW);
+      stimatfreq(StimOnset,LightHZ[idx],Pulse,LightPin);
       if (VolumeCount - EndingCount >= UnstimVolumes) {
         StimVolumeCount = VolumeCount;
         ++StimCount;
