@@ -139,6 +139,7 @@ switch(RunState) {
     }
   break;
   case 3: // RunState case 3
+  CurrentLED = 0;
   digitalWrite(LaserPin, LOW);
   digitalWrite(LightPin, LOW);
   break;
