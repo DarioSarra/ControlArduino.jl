@@ -30,6 +30,7 @@ int           StimCount    = 0; // variable to keep track of the current run as 
 int           Stimulations = WaitingIntVal; // variable that determines how many different type of stimulations are to be run
 int           idx;              // variable that ensures looping on the right stim indexes once the Stimulation count is more than the stimulation types
 unsigned long StimOnset      = 0;
+unsigned long Now            = 0;
 int           StimFreq1[10];
 int           StimDur1[10];
 int           StimFreq2[10];
@@ -38,8 +39,10 @@ int           Pulse          = 10;       // PulseWidth
 int           LightHZ[10];//        = WaitingIntVal;  // Masking Light freq
 
 // Saving variables
-int           CurrentHZ      = 0;
-int           CurrentDur     = 0;
+int           CurrentHZ_1    = 0;
+int           CurrentDur_1   = 0;
+int           CurrentHZ_2    = 0;
+int           CurrentDur_2   = 0;
 int           CurrentLED     = 0;
 int           CurrentStim    = 0;
 
@@ -86,7 +89,8 @@ void setup() {
   
 
   Serial.println(String("All Good:") + ' ' + String(millis())); // Signal that all is well
-  Serial.println("Volume,Time,RunState, StimState,Hz, Dur, MaskLED, StimCount");
+  delay(10);
+  Serial.println("Volume,Time,RunState, StimState,Hz_1, Dur_1,Hz_2, Dur_2, MaskLED, StimCount");
   delay(10);
 }
 
@@ -106,7 +110,7 @@ switch(RunState) {
   // Check if you are still in the stim period or go to run state 3
   if (VolumeCount >= PreStimVolumes + InStimVolumes) {
     RunState = 3;
-   CurrentStim = 0;
+    CurrentStim = 0;
     }
     // Until VolumeCount = PreStimVolumes + InStimVolumes goes in the stim switch loop
     switch (StimState) {
@@ -121,8 +125,10 @@ switch(RunState) {
       
       if (VolumeCount - StimVolumeCount >= StimVolumes) {
         EndingCount = VolumeCount;
-        CurrentHZ = 0;
-        CurrentDur = 0;
+        CurrentHZ_1 = 0;
+        CurrentDur_1 = 0;
+        CurrentHZ_2 = 0;
+        CurrentDur_2 = 0;
         StimState = 2;
       }
       break;
@@ -152,8 +158,10 @@ void savestatus () {
   String(millis()) + ',' + \
   String(RunState) + ',' + \
   String(StimState) + ',' + \
-  String(CurrentHZ) + ',' + \
-  String(CurrentDur) + ',' + \
+  String(CurrentHZ_1) + ',' + \
+  String(CurrentDur_1) + ',' + \
+  String(CurrentHZ_2) + ',' + \
+  String(CurrentDur_2) + ',' + \
   String(CurrentLED) + ',' + \
   String(CurrentStim)
   );
@@ -185,13 +193,16 @@ void stimatfreq (long onset, int freq, int pulse, int pin) {
 
 // Function to alternate between 2 stimulation frequencies over time; one can be 0
 void stimtiming (int hz1, int dur1, int hz2, int dur2) {
-  if (((millis() - StimOnset) % (dur1 + dur2)) < dur1) {
+  Now = (millis() - StimOnset) % (dur1 + dur2);
+  if (0 < Now && Now < dur1) {
     stimatfreq (StimOnset, hz1, Pulse, LaserPin);
-    CurrentHZ = hz1;
-    CurrentDur = dur1;
+    CurrentHZ_1 = hz1;
+    CurrentDur_1 = dur1;
   }
   else {
     stimatfreq (StimOnset, hz2, Pulse, LaserPin);
+    CurrentHZ_2 = hz2;
+    CurrentDur_2 = dur2;
   }
 }
 

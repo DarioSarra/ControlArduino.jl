@@ -8,7 +8,7 @@ module ControlArduino
     @everywhere import Dates.today, Dates.Date
 
     using Interact
-    include("StimulationStructure.jl")
+    # include("StimulationStructure.jl")
     const ArduinosController = falses(8)
     ports_available = get_port_list()
     const Arduino_dict = Dict(k => v for (k,v) in zip(ports_available,1:length(ports_available)))
