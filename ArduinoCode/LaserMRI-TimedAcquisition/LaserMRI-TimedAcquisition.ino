@@ -35,7 +35,7 @@ int           StimFreq1[10];
 int           StimDur1[10];
 int           StimFreq2[10];
 int           StimDur2[10];
-int           Pulse          = 10;       // PulseWidth
+int           Pulse[10];//          = 10;       // PulseWidth
 int           LightHZ[10];//        = WaitingIntVal;  // Masking Light freq
 
 // Saving variables
@@ -45,6 +45,7 @@ int           CurrentHZ_2    = 0;
 int           CurrentDur_2   = 0;
 int           CurrentLED     = 0;
 int           CurrentStim    = 0;
+int           CurrentPulse   = 0;
 
 
 
@@ -80,17 +81,19 @@ void setup() {
   memset(StimFreq2,-1,Stimulations*sizeof(int));
   memset(StimDur2,-1,Stimulations*sizeof(int));
   memset(LightHZ,-1,Stimulations*sizeof(int));
+  memset(Pulse,-1,Stimulations*sizeof(int));
 
   WaitForIntArray(StimFreq1,Stimulations, "Hz_1");
   WaitForIntArray(StimDur1,Stimulations, "mS_1");
   WaitForIntArray(StimFreq2,Stimulations, "Hz_2");
   WaitForIntArray(StimDur2,Stimulations, "mS_2");
+  WaitForIntArray(Pulse,Stimulations, "Pulse");
   WaitForIntArray(LightHZ,Stimulations, "Hz_LED");
   
 
   Serial.println(String("All Good:") + ' ' + String(millis())); // Signal that all is well
   delay(10);
-  Serial.println("Volume,Time,RunState, StimState,Hz_1, Dur_1,Hz_2, Dur_2, MaskLED, StimCount");
+  Serial.println("Volume,Time,RunState, StimState,Hz_1, Dur_1,Hz_2, Dur_2, MaskLED, Pulse, StimCount");
   delay(10);
 }
 
@@ -101,7 +104,7 @@ switch(RunState) {
   if (VolumeCount >= PreStimVolumes) {
     RunVolumeCount = VolumeCount;
     StimOnset = millis();
-    StimVolumeCount = VolumeCount;
+    StimVolumeCount = VolumeCount; //start a counter from the latest stim block initiation
     RunState = 2;
   }
   break;
@@ -118,24 +121,29 @@ switch(RunState) {
       idx = StimCount%Stimulations; // return the correct idx to select the parameter once all stimulation prtocols have been run
       CurrentStim = StimCount +1;
       // stimtiming is a function that given two stim frequencies and duration activate the laser counting the time from stim onset
-      stimtiming(StimFreq1[idx],StimDur1[idx],StimFreq2[idx],StimDur2[idx]);
+      stimtiming(StimFreq1[idx],StimDur1[idx],StimFreq2[idx],StimDur2[idx], Pulse[idx]);
       // masking light continous stimulation at max hearts throughout the stimulation period
-      stimatfreq(StimOnset,LightHZ[idx],Pulse,LightPin);
+      stimatfreq(StimOnset,LightHZ[idx],Pulse[idx],LightPin);
       CurrentLED = LightHZ[idx];
-      
+      /*
+       * When the volume count from the last beginning of a stimulation (VolumeCount - StimVolumeCount)
+       * exceeds the amount of volumes to be stimulated it goes to StimState 2. 
+       * This controls the block design stimulation (e.g. 10s On and 50sOff)
+       */
       if (VolumeCount - StimVolumeCount >= StimVolumes) {
         EndingCount = VolumeCount;
         CurrentHZ_1 = 0;
         CurrentDur_1 = 0;
         CurrentHZ_2 = 0;
         CurrentDur_2 = 0;
+        CurrentPulse = 0;
         StimState = 2;
       }
       break;
 
       case 2:// This is to wait UnstimVolumes number after stimulating
       digitalWrite(LaserPin, LOW);
-      stimatfreq(StimOnset,LightHZ[idx],Pulse,LightPin);
+      stimatfreq(StimOnset,LightHZ[idx],Pulse[idx],LightPin);
       if (VolumeCount - EndingCount >= UnstimVolumes) {
         StimVolumeCount = VolumeCount;
         ++StimCount;
@@ -163,6 +171,7 @@ void savestatus () {
   String(CurrentHZ_2) + ',' + \
   String(CurrentDur_2) + ',' + \
   String(CurrentLED) + ',' + \
+  String(CurrentPulse) + ',' + \
   String(CurrentStim)
   );
 }
@@ -191,16 +200,19 @@ void stimatfreq (long onset, int freq, int pulse, int pin) {
   }
 }
 
-// Function to alternate between 2 stimulation frequencies over time; one can be 0
-void stimtiming (int hz1, int dur1, int hz2, int dur2) {
+/* Function to alternate between 2 stimulation frequencies over time. To turn off stimulation use frequency = 0
+ * This function automatically alternate between frequencies hz1 and hz2 according to input durations dur1 and dur2 
+ * If a volume acquisition takes longer than the sum of dur1 and dur2, it will cycle back
+ */
+void stimtiming (int hz1, int dur1, int hz2, int dur2, int pulse) {
   Now = (millis() - StimOnset) % (dur1 + dur2);
   if (0 < Now && Now < dur1) {
-    stimatfreq (StimOnset, hz1, Pulse, LaserPin);
+    stimatfreq (StimOnset, hz1, pulse, LaserPin);
     CurrentHZ_1 = hz1;
     CurrentDur_1 = dur1;
   }
   else {
-    stimatfreq (StimOnset, hz2, Pulse, LaserPin);
+    stimatfreq (StimOnset, hz2, pulse, LaserPin);
     CurrentHZ_2 = hz2;
     CurrentDur_2 = dur2;
   }
