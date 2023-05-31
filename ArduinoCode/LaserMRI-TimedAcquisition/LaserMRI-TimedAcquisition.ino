@@ -125,6 +125,7 @@ switch(RunState) {
       // masking light continous stimulation at max hearts throughout the stimulation period
       stimatfreq(StimOnset,LightHZ[idx],Pulse[idx],LightPin);
       CurrentLED = LightHZ[idx];
+      CurrentPulse = Pulse[idx];
       /*
        * When the volume count from the last beginning of a stimulation (VolumeCount - StimVolumeCount)
        * exceeds the amount of volumes to be stimulated it goes to StimState 2. 
