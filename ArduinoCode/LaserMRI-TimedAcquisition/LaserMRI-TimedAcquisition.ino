@@ -113,7 +113,14 @@ switch(RunState) {
   // Check if you are still in the stim period or go to run state 3
   if (VolumeCount >= PreStimVolumes + InStimVolumes) {
     RunState = 3;
+    CurrentHZ_1 = 0;
+    CurrentDur_1 = 0;
+    CurrentHZ_2 = 0;
+    CurrentDur_2 = 0;
+    CurrentPulse = 0;
+    StimState = 0;
     CurrentStim = 0;
+    StimCount = 0;
     }
     // Until VolumeCount = PreStimVolumes + InStimVolumes goes in the stim switch loop
     switch (StimState) {
