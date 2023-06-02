@@ -39,7 +39,6 @@ es = ExpStruct(s,p,f)
 w_ex = widget(es);
 w = Window();body!(w, fetch(w_ex));
 ##
-println(w_ex[].Frequencies)
 
 ##
 ex = w_ex[]

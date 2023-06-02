@@ -11,22 +11,6 @@ the first step is always to activate the PKG library on the new processes, or we
 @everywhere using LibSerialPort, Distributed
 @everywhere import Dates.today, Dates.Date
 
-# The following files contain functions needed in all processes. Files have to be loaded in order: Structures followed by ArduinoCommunication
-@everywhere include(joinpath("DataStructures","SessionFile_structure.jl"))
-@everywhere include(joinpath("DataStructures","Frequencies_structure.jl"))
-@everywhere include(joinpath("DataStructures","Periods_structure.jl"))
-@everywhere include(joinpath("DataStructures","Experiment_structure.jl"))
-@everywhere include(joinpath("ArduinoCommunication","SerialPortsManager.jl"))
-@everywhere include(joinpath("ArduinoCommunication","MessageEncoding.jl"))
-@everywhere include(joinpath("ArduinoCommunication","ArduinoCommunication.jl"))
-
-# the following functions and values define the GUI and are only loaded in the main process 
-include(joinpath("GUI", "Premade_Stim_Protocols.jl"))
-include(joinpath("GUI", "GUI_utilities.jl"))
-include(joinpath("GUI", "SessionWidget.jl"))
-include(joinpath("GUI", "FrequencyWidget.jl"))
-include(joinpath("GUI", "PeriodWidget.jl"))
-include(joinpath("GUI", "ExperimentWidget.jl"))
 
 function laser_gui()
     f = FreqStruct();

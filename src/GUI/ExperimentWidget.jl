@@ -28,6 +28,7 @@ function Widgets.widget(e::ExpStruct)
 	    stimdur1 = rm_missing(ex.Frequencies.Volumes1)
 	    stimfreq2 = rm_missing(ex.Frequencies.Frequency2)
 	    stimdur2= rm_missing(ex.Frequencies.Volumes2)
+	    pulse= rm_missing(ex.Frequencies.Pulse)
 		maskled = rm_missing(ex.Frequencies.MaskLed)
 	    filename = ex.Session.FileName
 		running!(ex.Session.Arduino,true)
@@ -37,7 +38,7 @@ function Widgets.widget(e::ExpStruct)
 	        stimvolumes, unstimvolumes, stimulations,
 	        stimfreq1,stimdur1,
 	        stimfreq2,stimdur2,
-			maskled,
+			pulse, maskled,
 	        filename)
     end
 

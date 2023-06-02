@@ -21,7 +21,7 @@ function run_opto(Arduino_port::String,
     StimVolumes::Int64,UnstimVolumes::Int64,Stimulations::Int64,
     StimFreq1::Vector{Int64}, StimDur1::Vector{Int64},
     StimFreq2::Vector{Int64}, StimDur2::Vector{Int64},
-    LightHZ::Vector{Int64},
+    Pulse::Vector{Int64}, LightHZ::Vector{Int64},
     filename::String)
     # StimVolumes%(StimDur1+StimDur2) != 0 && error("amount of stimulated volumes is not a multiple of summed stim durations 1 and 2")
     # LightHZ = maximum(skipmissing(StimFreq1)) ####### to be deleted
@@ -55,10 +55,11 @@ function run_opto(Arduino_port::String,
                             corecct pairing of parameters across multiple protocols in a session. In other words the variable "Stimulations" fix is 
                             the length of these vectors=#
                             send_m(port,StimFreq1) # Frequency in Hz of the first stimulation type 
-                            send_m(port,StimDur1) # Duration in volumes of first stimulation type
+                            send_m(port,StimDur1) # Duration in ms of first stimulation type
                             send_m(port,StimFreq2) # Frequency in Hz of the second stimulation type
-                            send_m(port,StimDur2) # Duration in volumes of second stimulation type
-                            send_m(port,LightHZ) # New Vector containing a variable masking light frequency
+                            send_m(port,StimDur2) # Duration in ms of second stimulation type
+                            send_m(port,Pulse) # Duration in ms of a stimulation pulse
+                            send_m(port,LightHZ) # Vector containing the masking light frequency
                             sleep(0.001) 
                         end
                     end
@@ -101,6 +102,7 @@ function run_opto(ex::ExpStruct)
     stimdur1 = rm_missing(ex.Frequencies.Volumes1)
     stimfreq2 = rm_missing(ex.Frequencies.Frequency2)
     stimdur2= rm_missing(ex.Frequencies.Volumes2)
+    pulsewidth = rm_missing(ex.Frequencies.Pulse)
     ledfreq = rm_missing(ex.Frequencies.MaskLed)
     filename = ex.Session.FileName
 
@@ -109,7 +111,7 @@ function run_opto(ex::ExpStruct)
         stimvolumes, unstimvolumes, stimulations,
         stimfreq1,stimdur1,
         stimfreq2,stimdur2,
-        ledfreq,
+        pulsewidth, ledfreq,
         filename)
 end
 
