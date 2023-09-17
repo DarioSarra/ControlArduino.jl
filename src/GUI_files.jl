@@ -1,0 +1,6 @@
+include(joinpath("GUI", "Premade_Stim_Protocols.jl"))
+include(joinpath("GUI", "GUI_utilities.jl"))
+include(joinpath("GUI", "SessionWidget.jl"))
+include(joinpath("GUI", "FrequencyWidget.jl"))
+include(joinpath("GUI", "PeriodWidget.jl"))
+include(joinpath("GUI", "ExperimentWidget.jl"))

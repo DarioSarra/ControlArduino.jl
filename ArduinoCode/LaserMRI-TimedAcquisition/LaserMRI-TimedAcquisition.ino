@@ -9,7 +9,7 @@ int            LightPin     = 51;
 bool           NewVolume      = false;
 int            VolumeCount    = 0;              // Counter of the images acquired by the scanner
 int            RunVolumeCount = 0;              // Stores frame counter at the latest run beginning
-int            StimVolumeCount= 0;              // Stores frame counter at the latest stim block start
+int            InStimVolumeCount= 0;              // Stores frame counter at the latest stim block start
 int            EndingCount    = 0;              // Stores frame counter at the latest stim block end
 
 // States to control no stim and stim periods throughout the run
@@ -21,8 +21,9 @@ int            WaitingIntVal   = -1;             // this is a place holder for i
 int            PreStimVolumes  = WaitingIntVal;  // Number of volumes to wait before stim
 int            InStimVolumes   = WaitingIntVal;  // Number of volumes to use stimulation
 int            PostStimVolumes = WaitingIntVal;  // Number of volumes to wait after stim
-int            StimVolumes     = WaitingIntVal;  // Number of volumes to stimulate in Stim phase
 int            UnstimVolumes   = WaitingIntVal;  // Number of volumes NOT to stimulate in Stim phase
+int            StimVolumes     = WaitingIntVal;  // Number of volumes to stimulate in Stim phase
+
 
 
 // Stimulation parameters
@@ -69,8 +70,8 @@ void setup() {
   WaitForNumericalInput(PreStimVolumes, "PreStimVolumes");
   WaitForNumericalInput(InStimVolumes, "InStimVolumes");
   WaitForNumericalInput(PostStimVolumes, "PostStimVolumes");
-  WaitForNumericalInput(StimVolumes, "StimVolumes");
   WaitForNumericalInput(UnstimVolumes, "UnstimVolumes");
+  WaitForNumericalInput(StimVolumes, "StimVolumes");
   WaitForNumericalInput(Stimulations, "Stimulations");
  
   StimOnset = millis();
@@ -98,13 +99,13 @@ void setup() {
 }
 
 void loop() {
-updatevolumes();// This counts TTLs coming from the scanner to
+updatevolumes();// This counts TTLs coming from the scanner and saves the status
 switch(RunState) {
   case 1:
   if (VolumeCount >= PreStimVolumes) {
     RunVolumeCount = VolumeCount;
     StimOnset = millis();
-    StimVolumeCount = VolumeCount; //start a counter from the latest stim block initiation
+    InStimVolumeCount = VolumeCount; //start a counter from the latest stim block initiation
     RunState = 2;
   }
   break;
@@ -113,6 +114,51 @@ switch(RunState) {
   // Check if you are still in the stim period or go to run state 3
   if (VolumeCount >= PreStimVolumes + InStimVolumes) {
     RunState = 3;
+    }
+    // Until VolumeCount = PreStimVolumes + InStimVolumes goes in the stim switch loop
+    switch (StimState) {
+      case 1:// This is to stimulate for StimVolumes number: stimulation period
+      idx = StimCount%Stimulations; // return the correct idx to select the parameter on the stimulation protocol array
+      CurrentStim = StimCount +1; // Because the reminder is 0 everytime we are back to the first protocol we update to +1 in the saved data
+      
+      // masking light continous stimulation at LightHZ throughout the stimulation period
+      stimatfreq(StimOnset,LightHZ[idx],Pulse[idx],LightPin);
+      CurrentLED = LightHZ[idx];
+      CurrentPulse = Pulse[idx];
+      CurrentHZ_1 = 0;
+      CurrentDur_1 = 0;
+      CurrentHZ_2 = 0;
+      CurrentDur_2 = 0;
+      /*
+       * When the volume count from the last beginning of a stimulation period (VolumeCount - UnstimVolumes)
+       * exceeds the amount of not stimulated control volumes it goes to StimState 2. 
+       * This controls the block design stimulation (e.g. 30s Off and 10s On)
+       */
+      if (VolumeCount - InStimVolumeCount >= UnstimVolumes) {
+        EndingCount = VolumeCount; //This stores the volume count value when of the last unstim volume
+        StimState = 2;
+      }
+      break;
+
+      case 2:// This is to wait UnstimVolumes number after stimulating
+      digitalWrite(LaserPin, LOW);
+      stimatfreq(StimOnset,LightHZ[idx],Pulse[idx],LightPin);
+      /* stimtiming is a function that given two stim frequencies and duration activate the laser counting the time from stim onset
+         it also automatically update the current HZ and Dur values
+      */
+      stimtiming(StimFreq1[idx],StimDur1[idx],StimFreq2[idx],StimDur2[idx], Pulse[idx]);
+      
+      if (VolumeCount - EndingCount >= StimVolumes) { //when the volume count - last unstim count exceeds volumes to be stim it goes back to unstimulated state
+        InStimVolumeCount = VolumeCount;
+        ++StimCount;
+        StimState = 1;
+      }
+      break;
+    }
+  break;
+  case 3: // RunState case 3
+    digitalWrite(LaserPin, LOW);
+    digitalWrite(LightPin, LOW);
     CurrentHZ_1 = 0;
     CurrentDur_1 = 0;
     CurrentHZ_2 = 0;
@@ -121,49 +167,7 @@ switch(RunState) {
     StimState = 0;
     CurrentStim = 0;
     StimCount = 0;
-    }
-    // Until VolumeCount = PreStimVolumes + InStimVolumes goes in the stim switch loop
-    switch (StimState) {
-      case 1:// This is to stimulate for StimVolumes number: stimulation period
-      idx = StimCount%Stimulations; // return the correct idx to select the parameter once all stimulation prtocols have been run
-      CurrentStim = StimCount +1;
-      // stimtiming is a function that given two stim frequencies and duration activate the laser counting the time from stim onset
-      stimtiming(StimFreq1[idx],StimDur1[idx],StimFreq2[idx],StimDur2[idx], Pulse[idx]);
-      // masking light continous stimulation at max hearts throughout the stimulation period
-      stimatfreq(StimOnset,LightHZ[idx],Pulse[idx],LightPin);
-      CurrentLED = LightHZ[idx];
-      CurrentPulse = Pulse[idx];
-      /*
-       * When the volume count from the last beginning of a stimulation (VolumeCount - StimVolumeCount)
-       * exceeds the amount of volumes to be stimulated it goes to StimState 2. 
-       * This controls the block design stimulation (e.g. 10s On and 50sOff)
-       */
-      if (VolumeCount - StimVolumeCount >= StimVolumes) {
-        EndingCount = VolumeCount;
-        CurrentHZ_1 = 0;
-        CurrentDur_1 = 0;
-        CurrentHZ_2 = 0;
-        CurrentDur_2 = 0;
-        CurrentPulse = 0;
-        StimState = 2;
-      }
-      break;
-
-      case 2:// This is to wait UnstimVolumes number after stimulating
-      digitalWrite(LaserPin, LOW);
-      stimatfreq(StimOnset,LightHZ[idx],Pulse[idx],LightPin);
-      if (VolumeCount - EndingCount >= UnstimVolumes) {
-        StimVolumeCount = VolumeCount;
-        ++StimCount;
-        StimState = 1;
-      }
-      break;
-    }
-  break;
-  case 3: // RunState case 3
-  CurrentLED = 0;
-  digitalWrite(LaserPin, LOW);
-  digitalWrite(LightPin, LOW);
+    CurrentLED = 0;
   break;
   } 
 }

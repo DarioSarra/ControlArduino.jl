@@ -34,9 +34,9 @@ function Widgets.widget(p::PeriodStruct)
         vskip(0.5em),
         hbox(:PreStim,hskip(1em), :InStim, hskip(1em), :PostStim),
         vskip(1em),
-        "Define number of repetitions to alternate laser on-off during the stimulation period",
+        "Define number of repetitions to alternate laser off-on during the stimulation period",
         vskip(0.5em),
-        hbox(:StimON,hskip(1em),:StimOFF),
+        hbox(:StimOFF,hskip(1em),:StimON),
         vskip(0.1em),
         :Collect,
     )

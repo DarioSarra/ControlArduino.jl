@@ -1,6 +1,3 @@
-include(joinpath("DataStructures","SessionFile_structure.jl"))
-include(joinpath("DataStructures","Frequencies_structure.jl"))
-include(joinpath("DataStructures","Periods_structure.jl"))
 include(joinpath("DataStructures","Experiment_structure.jl"))
 include(joinpath("ArduinoCommunication","SerialPortsManager.jl"))
 include(joinpath("ArduinoCommunication","MessageEncoding.jl"))

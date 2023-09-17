@@ -1,17 +1,18 @@
 #Open arduino communication in a safe manner. The try loop avoid errors to break the process in case port is not accessible
 function open_communication(Arduino_port)
+    println("opening communication with $Arduino_port")
     port = SerialPort(Arduino_port)
     try
         open(port)
+        LibSerialPort.set_speed(port,115200)
+        LibSerialPort.set_flow_control(port, rts = SP_RTS_ON,dtr = SP_DTR_ON) ## Necessary to reset arduino upon opening the port
+        println("Opening Port")
+        println("Running Status $(running(Arduino_port))")
     catch e
         println(e)
         close(port)
         error("unable to open port")
     end
-    LibSerialPort.set_speed(port,115200)
-    LibSerialPort.set_flow_control(port, rts = SP_RTS_ON,dtr = SP_DTR_ON) ## Necessary to reset arduino upon opening the port
-    println("Opening Port")
-    println("Running Status $(running(Arduino_port))")
     return port
 end
 
@@ -23,8 +24,7 @@ function run_opto(Arduino_port::String,
     StimFreq2::Vector{Int64}, StimDur2::Vector{Int64},
     Pulse::Vector{Int64}, LightHZ::Vector{Int64},
     filename::String)
-    # StimVolumes%(StimDur1+StimDur2) != 0 && error("amount of stimulated volumes is not a multiple of summed stim durations 1 and 2")
-    # LightHZ = maximum(skipmissing(StimFreq1)) ####### to be deleted
+
     port = open_communication(Arduino_port)
     task_begun = false # variable to control writing on the saving file
     @async begin # @async macro ensures workers don't freeze waiting for completion of steps
@@ -44,8 +44,8 @@ function run_opto(Arduino_port::String,
                             send_m(port,PreStim) # Volumes before stimulation
                             send_m(port,InStim) # Volumes to stimulate
                             send_m(port,PostStim) # Volumes after stimulation
-                            send_m(port,StimVolumes) # Num of volumes to stimulate
                             send_m(port,UnstimVolumes) # Num of volumes to wait before and after the stimulation. It doubles in between two stimulations.
+                            send_m(port,StimVolumes) # Num of volumes to stimulate
                             send_m(port,Stimulations) # Num of stimulation protocols to feed. Arduino use this num to set the length of vectors storing info
                             #= To have a more fine grain control over the stimulation onset and offset, within the stimulation block two frequency settings
                             are defined. This allows to have a period stimulated at a frequency followed by a period non stimulated or stimulated at a 
