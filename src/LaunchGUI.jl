@@ -29,7 +29,7 @@ the experiment that they define.=#
 f = FreqStruct()
 #The session structure has info about the day, subject name and it combinesthem to define the output file location
 s = SessionStruct()
-p = PeriodStruct(2,10,2,3, 2)
+p = PeriodStruct(30,510,60,10,30)
 es = ExpStruct(s,p,f)
 # es = ExpStruct(f, s, 60,600,60,10, 50)
 w_ex = widget(es);

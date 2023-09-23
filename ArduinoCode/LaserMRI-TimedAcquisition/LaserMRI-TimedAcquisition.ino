@@ -115,9 +115,10 @@ switch(RunState) {
   if (VolumeCount >= PreStimVolumes + InStimVolumes) {
     RunState = 3;
     }
-    // Until VolumeCount = PreStimVolumes + InStimVolumes goes in the stim switch loop
+    // Until VolumeCount = PreStimVolumes + UnStimVolumes goes in the stim switch loop
     switch (StimState) {
-      case 1:// This is to stimulate for StimVolumes number: stimulation period
+      case 1:// This is to start the masking light before the stim period for UnstimVolumes number
+      digitalWrite(LaserPin, LOW);
       idx = StimCount%Stimulations; // return the correct idx to select the parameter on the stimulation protocol array
       CurrentStim = StimCount +1; // Because the reminder is 0 everytime we are back to the first protocol we update to +1 in the saved data
       
@@ -140,7 +141,7 @@ switch(RunState) {
       }
       break;
 
-      case 2:// This is to wait UnstimVolumes number after stimulating
+      case 2:// This is to stimulate for StimVolumes number after stimulating
       digitalWrite(LaserPin, LOW);
       stimatfreq(StimOnset,LightHZ[idx],Pulse[idx],LightPin);
       /* stimtiming is a function that given two stim frequencies and duration activate the laser counting the time from stim onset
