@@ -54,6 +54,10 @@ function Interact.widget(f::FreqStruct)
 	coll = button("Prepare Stim Frequencies")
 	freq_opt = labeled_widget("Premade Stim",dropdown,
 		val = OrderedDict(
+			"Sustained" => [PG_s_8_24],
+			"Transient" => [PG_t_24_24],
+			"Mixed1" => [PG_s_8_24, PG_t_24_24],
+			"Mixed2" => [PG_t_24_24, PG_s_8_24],
 			"PG-o16-tran-ml16" => [PG_t_16_16],
 			"PG-o4-sust-ml16" => [PG_s_4_16],
 			"PG-o16-sust-ml16" => [PG_s_16_16],
