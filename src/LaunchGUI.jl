@@ -25,11 +25,13 @@ include("GUI_files.jl")
 ##
 #= A gui is build combining multiple structures. These structures distinguished by the type of info about 
 the experiment that they define.=#
-# The Frequencies structure defines
+# The Frequencies structure defines the laser and masking light stimulation frquencies
 f = FreqStruct()
-#The session structure has info about the day, subject name and it combinesthem to define the output file location
+#The session structure has info about the day, subject name and it combines them to define the output file location
 s = SessionStruct()
-p = PeriodStruct(30,510,60,10,30)
+# The periood structure takes care of the sequence of events counting by volumes acquires
+p = PeriodStruct(20,600,100,10,40)
+# The experiment structures combines alle the info for the GUI
 es = ExpStruct(s,p,f)
 # es = ExpStruct(f, s, 60,600,60,10, 50)
 w_ex = widget(es);
