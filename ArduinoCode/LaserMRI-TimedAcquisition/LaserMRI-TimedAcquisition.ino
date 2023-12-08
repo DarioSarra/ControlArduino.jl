@@ -9,11 +9,12 @@ int            LightPin     = 51;
 bool           NewVolume      = false;
 int            VolumeCount    = 0;              // Counter of the images acquired by the scanner
 int            RunVolumeCount = 0;              // Stores frame counter at the latest run beginning
-int            InStimVolumeCount= 0;              // Stores frame counter at the latest stim block start
+int            InStimVolumeCount= 0;            // Stores frame counter at the latest stim block start
 int            EndingCount    = 0;              // Stores frame counter at the latest stim block end
+int            ResetVolume    = 0;              // Sores frame counter at the end of the post stimulation period
 
 // States to control no stim and stim periods throughout the run
-int            StimState      = 1;              // Switch Stimulation State (laser on-off)
+int            StimState      = 1;              // Switch Stimulation State (laser off-on)
 int            RunState       = 1;              // Switch Run State (Pre, during and post stim) 
 
 // Input volume counts
@@ -102,7 +103,7 @@ void loop() {
 updatevolumes();// This counts TTLs coming from the scanner and saves the status
 switch(RunState) {
   case 1:
-  if (VolumeCount >= PreStimVolumes) {
+  if (VolumeCount - ResetVolume >= PreStimVolumes) {
     RunVolumeCount = VolumeCount;
     StimOnset = millis();
     InStimVolumeCount = VolumeCount; //start a counter from the latest stim block initiation
@@ -112,7 +113,7 @@ switch(RunState) {
   
   case 2:
   // Check if you are still in the stim period or go to run state 3
-  if (VolumeCount >= PreStimVolumes + InStimVolumes) {
+  if (VolumeCount - ResetVolume >= PreStimVolumes + InStimVolumes) {
     RunState = 3;
     }
     // Until VolumeCount = PreStimVolumes + UnStimVolumes goes in the stim switch loop
@@ -169,6 +170,11 @@ switch(RunState) {
     CurrentStim = 0;
     StimCount = 0;
     CurrentLED = 0;
+    if (VolumeCount - ResetVolume >= PreStimVolumes + InStimVolumes + PostStimVolumes) {
+      ResetVolume = VolumeCount;
+      RunState = 1;
+      StimState = 1;
+    }
   break;
   } 
 }
